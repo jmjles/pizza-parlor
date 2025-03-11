@@ -1,5 +1,5 @@
 'use client'
-import { ShoppingCart, Menu, MenuOpen, LocalPizza, Settings } from '@mui/icons-material'
+import { Menu, LocalPizza, Settings } from '@mui/icons-material'
 import {
     AppBar, Button,
     Container,
@@ -7,14 +7,10 @@ import {
     IconButton, Stack,
     Typography as Font,
 } from '@mui/material'
-import { useState } from 'react'
 import blackBoard from '@/assets/images/blackboard.jpg'
 import woodBorder from '@/assets/images/wood-border.jpg'
-import WoodBorder from '@/assets/images/wood-border.jpg'
 
 const Bar = (props: BarType) => {
-    const [open, setOpen] = useState(false)
-
     return (
         <AppBar position="sticky" style={{
             backgroundImage: `url(${blackBoard.src})`,
@@ -25,7 +21,7 @@ const Bar = (props: BarType) => {
         }}>
             <Container>
                 <Grid2 container justifyContent="space-between" wrap="nowrap">
-                    <Button color="inherit">
+                    <Button color="inherit" onClick={props.openLocations}>
                         <Grid2
                             container
                             alignItems="center"
@@ -38,8 +34,10 @@ const Bar = (props: BarType) => {
                             </Grid2>
                             <Grid2>
                                 <Stack alignItems="start">
-                                    <Font variant="h4" textOverflow="ellipsis" maxWidth="100%" overflow="hidden" whiteSpace="nowrap">{props.city}</Font>
-                                    <Font textOverflow="ellipsis" maxWidth="100%" overflow="hidden" whiteSpace="nowrap">{props.location}</Font>
+                                    <Font variant="h4" textOverflow="ellipsis" maxWidth="100%" overflow="hidden"
+                                          whiteSpace="nowrap">{props.city}</Font>
+                                    <Font textOverflow="ellipsis" maxWidth="100%" overflow="hidden"
+                                          whiteSpace="nowrap">{props.location}</Font>
                                 </Stack>
                             </Grid2>
                         </Grid2>
@@ -63,6 +61,7 @@ const Bar = (props: BarType) => {
 }
 export type BarType = {
     city: string;
-    location: string;
+    location: string
+    openLocations: any
 };
 export default Bar
