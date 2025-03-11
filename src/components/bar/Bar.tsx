@@ -1,5 +1,5 @@
 'use client'
-import { Menu, LocalPizza, Settings } from '@mui/icons-material'
+import { Menu, LocalPizza, Settings, ShoppingCart } from '@mui/icons-material'
 import {
     AppBar, Button,
     Container,
@@ -43,6 +43,11 @@ const Bar = (props: BarType) => {
                         </Grid2>
                     </Button>
                     <Grid2 container spacing={2} wrap="nowrap" alignItems="center">
+                        <Grid2 display={{ xs: 'none', sm: 'initial', xl: 'none' }}>
+                            <IconButton color="inherit">
+                                <ShoppingCart fontSize="medium" />
+                            </IconButton>
+                        </Grid2>
                         <Grid2 display={{ xs: 'initial', xl: 'none' }}>
                             <IconButton color="inherit">
                                 <Menu fontSize="medium" />
