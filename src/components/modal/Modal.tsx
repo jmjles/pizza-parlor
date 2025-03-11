@@ -1,4 +1,4 @@
-import { Container, Dialog, DialogContent, DialogTitle, IconButton, Typography as Font } from '@mui/material'
+import { Container, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { JSX } from 'react'
 
