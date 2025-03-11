@@ -9,8 +9,8 @@ const Modal = (props: ModalType) => {
             <Container style={{ textAlign: 'right' }} disableGutters>
                 <IconButton color="error"><Close /></IconButton>
             </Container>
-            <DialogTitle align="center" variant="h3">
-                    {props.title}
+            <DialogTitle align="center" variant="h3" sx={{ paddingTop: '0px' }}>
+                {props.title}
             </DialogTitle>
             <DialogContent>
                 {props.children}
