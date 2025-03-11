@@ -41,7 +41,7 @@ const MenuItem = (props: MenuItemType) => {
                 <InputLabel id="Size">Size</InputLabel>
                 <Select labelId="Size" id="Size" label="Size" fullWidth>
                   {props.sizeOptions?.map((s) => (
-                    <MuiMenuItem value={s}>{s}</MuiMenuItem>
+                    <MuiMenuItem value={s} key={s}>{s}</MuiMenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -78,11 +78,11 @@ const MenuItem = (props: MenuItemType) => {
             position="relative"
           >
             {props.buttons?.map((b) => (
-              <Grid2>
+              <Grid2 key={b.title}>
                 <Button style={{ height: "83px" }}>
                   <Stack direction="column" alignItems="center">
                     <LocalPizza fontSize={b.title} />
-                    <Font autoCapitalize="on">{b.title}</Font>
+                    <Font autoCapitalize="sentences">{b.title}</Font>
                     <Font>{b.price}</Font>
                   </Stack>
                 </Button>
