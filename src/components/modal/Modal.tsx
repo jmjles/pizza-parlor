@@ -1,18 +1,29 @@
-import { Container, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material'
+import {
+    Breakpoint,
+    Container,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { JSX } from 'react'
 
 const Modal = (props: ModalType) => {
-
+    const theme = useTheme()
+    const fullscreen = useMediaQuery(theme.breakpoints.down(props.fullscreen || 'sm'))
     return (
-        <Dialog open={props.open} maxWidth="lg" onClose={props.handleClose}>
+        <Dialog open={props.open} maxWidth={props.maxWidth || 'lg'} onClose={props.handleClose} scroll="paper"
+                fullScreen={fullscreen}>
             <Container style={{ textAlign: 'right' }} disableGutters>
-                <IconButton color="error"><Close /></IconButton>
+                <IconButton color="error" onClick={props.handleClose}><Close /></IconButton>
             </Container>
             <DialogTitle align="center" variant="h3" sx={{ paddingTop: '0px' }}>
                 {props.title}
             </DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{ overflowY: "visible" }}>
                 {props.children}
             </DialogContent>
         </Dialog>
@@ -27,5 +38,7 @@ interface ModalType extends ModalPropType {
 export type ModalPropType = {
     open: boolean;
     handleClose: any;
+    maxWidth?: Breakpoint;
+    fullscreen?: Breakpoint;
 }
 export default Modal

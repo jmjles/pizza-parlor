@@ -5,17 +5,20 @@ import {
   CardContent,
   CardMedia,
   Grid2,
-  Stack,
   Typography as Font,
   Select,
   MenuItem as MuiMenuItem,
   InputLabel,
-  FormControl,
-} from "@mui/material";
-import { LocalPizza } from "@mui/icons-material";
+  FormControl, SvgIconTypeMap,
+} from '@mui/material'
 import Pizza from "@/assets/images/pizza.jpg";
+import MenuItemSize from '@/components/menuItem/MenuItemSize'
+import { OverridableComponent } from '@mui/types'
 
-const MenuItem = (props: MenuItemType) => {
+const MenuItem = (props: MenuItemProps) => {
+  const handleSelect = (size:number) => {
+    props.onSelect(props,size);
+  }
   return (
     <Card style={{ height: 675, position: "relative" }}>
       <CardMedia component="img" image={Pizza.src} height="250" />
@@ -77,23 +80,16 @@ const MenuItem = (props: MenuItemType) => {
             alignItems="center"
             position="relative"
           >
-            {props.buttons?.map((b) => (
-              <Grid2 key={b.title}>
-                <Button style={{ height: "83px" }}>
-                  <Stack direction="column" alignItems="center">
-                    <LocalPizza fontSize={b.title} />
-                    <Font autoCapitalize="sentences">{b.title}</Font>
-                    <Font>{b.price}</Font>
-                  </Stack>
-                </Button>
-              </Grid2>
-            ))}
+            {props.buttons && <MenuItemSize sizes={props.buttons} disableToggle onSelect={handleSelect}/> }
           </Grid2>
         )}
       </CardActions>
     </Card>
   );
 };
+interface MenuItemProps extends MenuItemType {
+  onSelect: (item:MenuItemType, size:number)=> void;
+}
 export type MenuItemType = {
   title: string;
   description: string;
@@ -104,10 +100,17 @@ export type MenuItemType = {
   amountLimit?: number;
   size?: boolean;
   sizeOptions?: string[];
+  sauce: SauceType
 };
-
-type MenuSizeButtonType = {
-  title: "small" | "medium" | "large";
+export type SauceType = {
+  name:string
+  amount:string
+  price:number
+}
+export type MenuSizeButtonType = {
+  title:string;
+  iconSize: "small" | "medium" | "large";
+  icon: OverridableComponent<SvgIconTypeMap>;
   price: string;
 };
 

@@ -12,13 +12,18 @@ const Cart = () => {
             borderImage: `url(${WoodBorder.src}) 20`,
             borderImageRepeat: 'repeat',
             borderWidth: '10px',
-            borderStyle:"solid"
+            borderStyle: 'solid',
         }}>
-            <Font variant="h4" align="center">My Order</Font>
-            <Divider style={{borderColor:"#FFF"}}/>
-            <Font align="center" variant="h5">
-                Take Out
-            </Font>
+            <Button fullWidth style={{color:"#FFF"}}>
+                <Stack>
+                    <Font variant="h4" align="center">My Order</Font>
+                    <Divider style={{ borderColor: '#FFF' }} />
+                    <Font align="center" variant="h5">
+                        Take Out
+                    </Font>
+                </Stack>
+            </Button>
+
             <Font variant="h6">
                 Order Time:
             </Font>

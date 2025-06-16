@@ -13,7 +13,7 @@ const Menu = (props: MenuPropsType) => {
                     <Grid2 container justifyContent="space-between" spacing={2}>
                         {i.menuItems.map((m, id) => (
                             <Grid2 key={id} size={{xs:12,sm:6,md:3.8}}>
-                                <MenuItem {...m} />
+                                <MenuItem {...m} onSelect={props.onSelect}/>
                             </Grid2>
                         ))}
                     </Grid2>
@@ -28,5 +28,6 @@ export type MenuType = {
 };
 type MenuPropsType = {
     items: MenuType[];
+    onSelect: any
 };
 export default Menu
