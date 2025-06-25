@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { CssBaseline } from '@mui/material'
 import brickWall from '@/assets/images/bricks.jpg'
+import StoreProvider from '@/store/StoreProvider.tsx'
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -26,7 +27,9 @@ export default function RootLayout({ children }: Readonly<{
         <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <CssBaseline />
-        {children}
+        <StoreProvider>
+            {children}
+        </StoreProvider>
         <div style={{
             backgroundImage: `url(${brickWall.src})`,
             position: 'fixed',
