@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
 import { selectModal, selectStore } from '@/store/selectors.tsx'
-import { toggleLoginModal, toggleSignupModal } from '@/store/slices.tsx'
+import { setUser, toggleLoginModal, toggleSignupModal, toggleStoreModal } from '@/store/slices.tsx'
 import { ChangeEvent, FormEvent, useState } from 'react'
 
 const SignUp = () => {
@@ -71,7 +71,6 @@ const SignUp = () => {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setLoading(true)
-        // TODO: sign up logic
         const data = {
             firstName,
             lastName,
@@ -91,7 +90,11 @@ const SignUp = () => {
         if (res.status !== 201) {
             return
         }
-
+        const {user,token} = await res.json()
+        localStorage.setItem("token", token)
+        dispatch(setUser(user))
+        dispatch(toggleSignupModal())
+        dispatch(toggleStoreModal())
     }
     const handleClose = () => {
         dispatch(toggleSignupModal())
