@@ -154,7 +154,7 @@ export const userSlice = createSlice({
         zipcode: '',
         state: '',
         profileIMG: '',
-        type:''
+        type: '',
     },
     reducers: {
         setUser: (state, action: PayloadAction<UserType>) => {
@@ -172,7 +172,7 @@ export const userSlice = createSlice({
                 zipcode: '',
                 state: '',
                 profileIMG: '',
-                type:''
+                type: '',
             }
         },
     },

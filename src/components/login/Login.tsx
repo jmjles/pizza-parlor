@@ -19,7 +19,7 @@ import {
     toggleStoreModal,
     toggleWelcomeModal,
 } from '@/store/slices.tsx'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 
 const Login = () => {
     const modals = useAppSelector(selectModal)
@@ -30,29 +30,32 @@ const Login = () => {
     const [password, setPassword] = useState('')
     const [remember, setRemember] = useState(false)
     const [useSample, setUseSample] = useState(false)
+    const [useSampleVendor, setUseSampleVendor] = useState(false)
+    const [loginError, setLoginError] = useState('')
+    const [loading, setLoading] = useState(false)
 
-    const sampleUser = {
-        email: 'user@example.com',
-        password: 'password',
-    }
+    useEffect(() => {
+        setLoginError('')
+    }, [email, password])
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        //! TODO: create submit
+        setLoading(true)
+        const res = await fetch('/api/user/login/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, remember }),
+        })
+        setLoading(false)
+        if (res.status === 400 || res.status === 500) {
+            const errorRes = await res.json()
+            setLoginError(errorRes.error)
+            return
+        }
+        const { user, token } = await res.json()
+        localStorage.setItem('token', token)
         dispatch(toggleLoginModal())
-        dispatch(
-            setUser({
-                email,
-                type:"example",
-                firstName: 'Sample',
-                lastName: 'User',
-                address: '123 Abc St.',
-                city: 'City',
-                zipcode: '2345',
-                state: 'SL',
-                profileIMG: 'https://s3.amazonaws.com/images/profiles/123.jpg',
-            })
-        )
+        dispatch(setUser(user))
         dispatch(toggleStoreModal())
     }
 
@@ -69,16 +72,20 @@ const Login = () => {
         dispatch(toggleLoginModal())
         dispatch(toggleStoreModal())
     }
-    const handleSample = () => {
-        if (useSample) {
+
+    const handleSample = (vendor?: boolean) => {
+        const pwd = 'password'
+        if (useSample || useSampleVendor) {
             setEmail('')
             setPassword('')
         } else {
-            setEmail(sampleUser.email)
-            setPassword(sampleUser.password)
+            setEmail(vendor ? 'vendor@example.com' : 'customer@example.com')
+            setPassword(pwd)
         }
-        setUseSample((p) => !p)
+        if (vendor) setUseSampleVendor((p) => !p)
+        else setUseSample((p) => !p)
     }
+
     return (
         <Modal
             title="Pizza Parlor"
@@ -96,13 +103,35 @@ const Login = () => {
             >
                 <LocalPizza style={{ fontSize: '128px' }} />
                 <Font variant="h4">Sign In</Font>
-                <FormControlLabel
-                    control={
-                        <Checkbox checked={useSample}
-                                  onClick={handleSample}/>
-                    }
-                    label="Use Sample User Login"
-                />
+                <Grid2
+                    container
+                    direction="column"
+                    alignItems="start"
+                    width="100%"
+                    spacing={0}
+                >
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={useSampleVendor}
+                                onClick={() => handleSample(true)}
+                                disabled={useSample}
+                            />
+                        }
+                        label="Use Sample Vendor Login"
+                    />
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={useSample}
+                                onClick={() => handleSample()}
+                                disabled={useSampleVendor}
+                            />
+                        }
+                        label="Use Sample User Login"
+                    />
+                </Grid2>
+
                 <TextField
                     label="Email"
                     type="email"
@@ -110,7 +139,9 @@ const Login = () => {
                     fullWidth
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={useSample}
+                    disabled={useSample || useSampleVendor}
+                    error={loginError.length > 0}
+                    helperText={loginError}
                 />
                 <TextField
                     label="Password"
@@ -119,7 +150,9 @@ const Login = () => {
                     fullWidth
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={useSample}
+                    disabled={useSample || useSampleVendor}
+                    error={loginError.length > 0}
+                    helperText={loginError}
                 />
                 <Stack direction="row" alignItems="center">
                     <FormControlLabel
@@ -133,7 +166,12 @@ const Login = () => {
                     />
                     <Button variant="text">Reset Password</Button>
                 </Stack>
-                <Button variant="contained" fullWidth type="submit">
+                <Button
+                    variant="contained"
+                    fullWidth
+                    type="submit"
+                    loading={loading}
+                >
                     Sign in
                 </Button>
                 <Divider flexItem />
