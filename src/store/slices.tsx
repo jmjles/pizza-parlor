@@ -1,6 +1,18 @@
-import { createSlice, PayloadAction, Slice } from '@reduxjs/toolkit'
-import { StoreType } from '@/components/stores/Store.tsx'
-import { MenuItemType } from '@/components/menuItem/MenuItem.tsx'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { StoreType } from '@/lib/db/model/store.ts'
+import {
+    cartInitialState,
+    ingredientInitialState,
+    menuItemInitialState,
+    MenuItemTypes,
+    orderInitialState,
+    storeInitialState,
+    userInitialState,
+} from '@/store/initialState.ts'
+import { UserType } from '@/lib/db/model/user.ts'
+import { MenuCategoryType } from '@/lib/db/model/menuCategory.ts'
+import { OrderItemsType, OrderType } from '@/lib/db/model/order.ts'
+import { IngredientType } from '@/lib/classes/Ingredient.ts'
 
 export const modalSlice = createSlice({
     name: 'modals',
@@ -17,46 +29,50 @@ export const modalSlice = createSlice({
         confirmPasswordModal: false,
         deleteAccountModal: false,
         changePasswordModal: false,
+        checkoutModal: false,
     },
     reducers: {
         toggleStoreModal: (state) => {
-            return { ...state, storeModal: !state.storeModal }
+            state.storeModal = !state.storeModal
         },
         toggleItemModal: (state) => {
-            return { ...state, itemModal: !state.itemModal }
+            state.itemModal = !state.itemModal
         },
         toggleOrderModal: (state) => {
-            return { ...state, orderModal: !state.orderModal }
+            state.orderModal = !state.orderModal
         },
         togglePastOrderModal: (state) => {
-            return { ...state, pastOrderModal: !state.pastOrderModal }
+            state.pastOrderModal = !state.pastOrderModal
         },
         toggleLoginModal: (state) => {
-            return { ...state, loginModal: !state.loginModal }
+            state.loginModal = !state.loginModal
         },
         toggleSignupModal: (state) => {
-            return { ...state, signupModal: !state.signupModal }
+            state.signupModal = !state.signupModal
         },
         toggleWelcomeModal: (state) => {
-            return { ...state, welcomeModal: !state.welcomeModal }
+            state.welcomeModal = !state.welcomeModal
+        },
+        setWelcomeModal: (state, action: PayloadAction<boolean>) => {
+            state.welcomeModal = action.payload
         },
         toggleUserModal: (state) => {
-            return { ...state, userModal: !state.userModal }
+            state.userModal = !state.userModal
         },
         toggleCartModal: (state) => {
-            return { ...state, cartModal: !state.cartModal }
+            state.cartModal = !state.cartModal
         },
         toggleConfirmPasswordModal: (state) => {
-            return {
-                ...state,
-                confirmPasswordModal: !state.confirmPasswordModal,
-            }
+            state.confirmPasswordModal = !state.confirmPasswordModal
         },
         toggleDeleteAccountModal: (state) => {
-            return { ...state, deleteAccountModal: !state.deleteAccountModal }
+            state.deleteAccountModal = !state.deleteAccountModal
         },
         toggleChangePasswordModal: (state) => {
-            return { ...state, changePasswordModal: !state.changePasswordModal }
+            state.changePasswordModal = !state.changePasswordModal
+        },
+        toggleCheckoutModal: (state) => {
+            state.checkoutModal = !state.checkoutModal
         },
     },
 })
@@ -69,75 +85,80 @@ export const {
     toggleUserModal,
     toggleLoginModal,
     toggleCartModal,
+    setWelcomeModal,
     toggleWelcomeModal,
     toggleDeleteAccountModal,
     toggleChangePasswordModal,
     toggleConfirmPasswordModal,
+    toggleCheckoutModal,
 } = modalSlice.actions
 
-export const itemSlice: Slice<{ item: MenuItemType; size: number }> =
-    createSlice({
-        name: 'item',
-        initialState: {
-            item: {
-                title: '',
-                description: '',
-                image: '',
-                sauce: { name: '', amount: '', price: 0 },
-            },
-            size: -1,
-        },
-        reducers: {
-            setItem: (state, action: PayloadAction<MenuItemType>) => {
-                return {
-                    ...state,
-                    item: action.payload,
-                }
-            },
-            setSize: (state, action: PayloadAction<number>) => {
-                return {
-                    ...state,
-                    size: action.payload,
-                }
-            },
-        },
-    })
-export const { setItem, setSize } = itemSlice.actions
-
-export const storeSlice: Slice<{ store: StoreType }> = createSlice({
-    name: 'store',
-    initialState: {
-        store: {
-            state: '',
-            city: '',
-            image: '',
-            zipcode: '',
-            waitTime: '',
-            streetAddress: '',
-        },
-    },
+export const itemSlice = createSlice({
+    name: 'item',
+    initialState: menuItemInitialState,
     reducers: {
-        setStore: (state, action: PayloadAction<StoreType>) => {
-            return {
-                ...state,
-                store: action.payload,
-            }
+        setSelectedItem: (
+            state,
+            action: PayloadAction<{ item: MenuItemTypes; size?: number }>
+        ) => {
+            state.menuItem = action.payload.item
+            if (typeof action.payload.size === 'number')
+                state.size = action.payload.size
+        },
+        setItem: (state, action: PayloadAction<MenuItemTypes>) => {
+            state.menuItem = action.payload
+        },
+        setItems: (state, action: PayloadAction<MenuItemTypes[]>) => {
+            state.menuItems = action.payload
+        },
+        setSize: (state, action: PayloadAction<number>) => {
+            state.size = action.payload
+        },
+        setCategory: (state, action: PayloadAction<MenuCategoryType>) => {
+            state.category = action.payload
+        },
+        refreshMenuItems: (state) => {
+            state.refreshMenuItems += 1
         },
     },
 })
-export const { setStore } = storeSlice.actions
+export const {
+    setItem,
+    setSize,
+    setSelectedItem,
+    setItems,
+    refreshMenuItems,
+    setCategory,
+} = itemSlice.actions
+
+export const storeSlice = createSlice({
+    name: 'store',
+    initialState: storeInitialState,
+    reducers: {
+        setStore: (state, action: PayloadAction<StoreType>) => {
+            state.store = action.payload
+        },
+        clearStore: (state) => {
+            state.store = storeInitialState['store']
+        },
+        setStores: (state, action: PayloadAction<StoreType[]>) => {
+            state.stores = action.payload
+        },
+        refreshStores: (state) => {
+            state.refreshStores += 1
+        },
+    },
+})
+
+export const { setStore, clearStore, setStores, refreshStores } =
+    storeSlice.actions
 
 export const cartSlice = createSlice({
     name: 'cart',
-    initialState: {
-        cart: {},
-    },
+    initialState: cartInitialState,
     reducers: {
-        setCart: (state, action) => {
-            return {
-                ...state,
-                order: action.payload,
-            }
+        setCart: (state, action: PayloadAction<OrderItemsType[]>) => {
+            state.cart = action.payload
         },
     },
 })
@@ -145,17 +166,7 @@ export const { setCart } = cartSlice.actions
 
 export const userSlice = createSlice({
     name: 'user',
-    initialState: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        address: '',
-        city: '',
-        zipcode: '',
-        state: '',
-        profileIMG: '',
-        type: '',
-    },
+    initialState: userInitialState,
     reducers: {
         setUser: (state, action: PayloadAction<UserType>) => {
             return { ...state, ...action.payload }
@@ -164,28 +175,47 @@ export const userSlice = createSlice({
             localStorage.removeItem('token')
             return {
                 ...state,
-                firstName: '',
-                lastName: '',
-                email: '',
-                address: '',
-                city: '',
-                zipcode: '',
-                state: '',
-                profileIMG: '',
-                type: '',
+                ...userInitialState,
             }
         },
     },
 })
-export type UserType = {
-    firstName: string
-    lastName: string
-    email: string
-    address: string
-    city: string
-    zipcode: string
-    state: string
-    profileIMG: string
-    type: string
-}
+
 export const { setUser, signOutUser } = userSlice.actions
+
+export const ingredientSlice = createSlice({
+    name: 'ingredient',
+    initialState: ingredientInitialState,
+    reducers: {
+        setIngredients: (state, action: PayloadAction<IngredientType[]>) => {
+            state.ingredients = action.payload
+        },
+        setIngredient: (state, action: PayloadAction<IngredientType>) => {
+            state.ingredient = action.payload
+        },
+        refreshIngredients: (state) => {
+            state.refreshIngredients += 1
+        },
+    },
+})
+
+export const { setIngredients, setIngredient, refreshIngredients } =
+    ingredientSlice.actions
+
+export const orderSlice = createSlice({
+    name: 'order',
+    initialState: orderInitialState,
+    reducers: {
+        setOrder: (state, action: PayloadAction<OrderType>) => {
+            state.order = action.payload
+        },
+        setLoadingOrder: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload
+        },
+        setOrders: (state, action: PayloadAction<OrderType[]>) => {
+            state.orders = action.payload
+        },
+    },
+})
+
+export const { setOrder, setLoadingOrder, setOrders } = orderSlice.actions
