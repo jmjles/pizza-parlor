@@ -1,11 +1,18 @@
 import Modal from '@/components/modal/Modal.tsx'
 import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
 import { selectModal, selectUser } from '@/store/selectors.tsx'
-import { toggleChangePasswordModal, toggleDeleteAccountModal, toggleUserModal } from '@/store/slices.tsx'
+import {
+    toggleChangePasswordModal,
+    toggleConfirmPasswordModal,
+    toggleDeleteAccountModal,
+    toggleUserModal,
+} from '@/store/slices.tsx'
 import { Button, Grid2, Stack, TextField, Typography } from '@mui/material'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, use, useEffect, useState } from 'react'
 import { Delete, Edit } from '@mui/icons-material'
 import DeleteUser from '@/components/user/DeleteUser.tsx'
+import userApi from '@/lib/api/userApi.ts'
+import ConfirmPassword from '@/components/password/ConfirmPassword.tsx'
 
 const User = () => {
     const dispatch = useAppDispatch()
@@ -76,9 +83,10 @@ const User = () => {
         setUpdate((p) => !p)
     }
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        //TODO: add server logic
+        console.log('in')
+        dispatch(toggleConfirmPasswordModal())
     }
 
     const handleDelete = () => {
@@ -96,125 +104,146 @@ const User = () => {
             handleClose={handleClose}
             maxWidth="sm"
         >
-            <Grid2
-                container
-                component="form"
-                spacing={2}
-                onSubmit={handleSubmit}
-            >
-                <Stack
+            <>
+                <Grid2
+                    container
+                    component="form"
                     spacing={2}
-                    direction="row"
-                    justifyContent="space-between"
-                    width="100%"
+                    onSubmit={handleSubmit}
                 >
+                    <Stack
+                        spacing={2}
+                        direction="row"
+                        justifyContent="space-between"
+                        width="100%"
+                    >
+                        <TextField
+                            label="First Name"
+                            name="FirstName"
+                            required
+                            fullWidth
+                            disabled={!update}
+                            value={firstName}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            label="Last Name"
+                            name="LastName"
+                            required
+                            fullWidth
+                            disabled={!update}
+                            value={lastName}
+                            onChange={handleChange}
+                        />
+                    </Stack>
                     <TextField
-                        label="First Name"
-                        name="FirstName"
+                        label="Email"
+                        type="email"
+                        name="Email"
                         required
                         fullWidth
                         disabled={!update}
-                        value={firstName}
+                        value={email}
                         onChange={handleChange}
                     />
                     <TextField
-                        label="Last Name"
-                        name="LastName"
+                        label="Address"
+                        name="Address"
                         required
                         fullWidth
                         disabled={!update}
-                        value={lastName}
+                        value={address}
                         onChange={handleChange}
                     />
-                </Stack>
-                <TextField
-                    label="Email"
-                    type="email"
-                    name="Email"
-                    required
-                    fullWidth
-                    disabled={!update}
-                    value={email}
-                    onChange={handleChange}
-                />
-                <TextField
-                    label="Address"
-                    name="Address"
-                    required
-                    fullWidth
-                    disabled={!update}
-                    value={address}
-                    onChange={handleChange}
-                />
-                <TextField
-                    label="City"
-                    name="City"
-                    required
-                    fullWidth
-                    disabled={!update}
-                    value={city}
-                    onChange={handleChange}
-                />
-                <TextField
-                    label="State"
-                    name="State"
-                    required
-                    fullWidth
-                    disabled={!update}
-                    value={state}
-                    onChange={handleChange}
-                />
-                <TextField
-                    label="Zipcode"
-                    name="Zipcode"
-                    required
-                    fullWidth
-                    disabled={!update}
-                    value={zipcode}
-                    onChange={handleChange}
-                />
-                <Stack
-                    spacing={2}
-                    direction="row"
-                    justifyContent="space-between"
-                    width="100%"
-                >
-                    {update ? (
-                        <Button
-                            color="error"
-                            variant="contained"
-                            onClick={handleDelete}
-                        >
-                            <Stack direction="row" spacing={1}>
-                                <Delete /> Delete Account
-                            </Stack>
-                        </Button>
-                    ) : (
-                        <Button variant="contained" onClick={handleChangePassword}>Change Password</Button>
-                    )}
-                    {update ? (
-                        <Button variant="contained" type="submit">
-                            <Typography variant="button">
-                                Submit Changes
-                            </Typography>
-                        </Button>
-                    ) : (
-                        <Button variant="contained" onClick={handleUpdate}>
-                            <Stack
-                                direction={'row'}
-                                spacing={1}
-                                alignContent="center"
+                    <TextField
+                        label="City"
+                        name="City"
+                        required
+                        fullWidth
+                        disabled={!update}
+                        value={city}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        label="State"
+                        name="State"
+                        required
+                        fullWidth
+                        disabled={!update}
+                        value={state}
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        label="Zipcode"
+                        name="Zipcode"
+                        required
+                        fullWidth
+                        disabled={!update}
+                        value={zipcode}
+                        onChange={handleChange}
+                    />
+                    <Stack
+                        spacing={2}
+                        direction="row"
+                        justifyContent="space-between"
+                        width="100%"
+                    >
+                        {update ? (
+                            <Button
+                                color="error"
+                                variant="contained"
+                                onClick={handleDelete}
                             >
-                                <Edit />
+                                <Stack direction="row" spacing={1}>
+                                    <Delete /> Delete Account
+                                </Stack>
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                onClick={handleChangePassword}
+                            >
+                                Change Password
+                            </Button>
+                        )}
+                        {update && (
+                            <Button variant="contained" type="submit">
                                 <Typography variant="button">
-                                    Edit Account
+                                    Submit Changes
                                 </Typography>
-                            </Stack>
-                        </Button>
-                    )}
-                </Stack>
-                <DeleteUser/>
-            </Grid2>
+                            </Button>
+                        )}
+                        {!update && (
+                            <Button variant="contained" onClick={handleUpdate}>
+                                <Grid2
+                                    container
+                                    spacing={1}
+                                    alignContent="center"
+                                >
+                                    <Edit />
+                                    <Typography variant="button">
+                                        Edit Account
+                                    </Typography>
+                                </Grid2>
+                            </Button>
+                        )}
+                    </Stack>
+                    <DeleteUser />
+                </Grid2>
+                <ConfirmPassword
+                    user={{
+                        ...user,
+                        firstName,
+                        lastName,
+                        email,
+                        address,
+                        zipcode,
+                        city,
+                        state,
+                    }}
+                    handleUpdate={handleUpdate}
+                />
+            </>
         </Modal>
     )
 }

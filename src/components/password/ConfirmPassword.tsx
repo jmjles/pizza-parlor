@@ -1,7 +1,7 @@
 import Modal from '@/components/modal/Modal.tsx'
 import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
-import { selectModal } from '@/store/selectors.tsx'
-import { toggleConfirmPasswordModal } from '@/store/slices.tsx'
+import { selectModal, selectUser } from '@/store/selectors.tsx'
+import { setUser, toggleConfirmPasswordModal } from '@/store/slices.tsx'
 import {
     Button,
     Grid2,
@@ -11,9 +11,15 @@ import {
 } from '@mui/material'
 import { Cancel } from '@mui/icons-material'
 import { ChangeEvent, FormEvent, useState } from 'react'
+import userApi from '@/lib/api/userApi.ts'
+import { UserInitialStateType } from '@/store/initialState.ts'
 
-const ConfirmPassword = () => {
+const ConfirmPassword = (props: {
+    user: UserInitialStateType
+    handleUpdate: any
+}) => {
     const modals = useAppSelector(selectModal)
+    const user = useAppSelector(selectUser)
     const dispatch = useAppDispatch()
     const [password, setPassword] = useState('')
     const [passwordError, setPasswordError] = useState('')
@@ -21,20 +27,53 @@ const ConfirmPassword = () => {
         dispatch(toggleConfirmPasswordModal())
     }
 
-    const handleConfirm = (e: FormEvent<HTMLFormElement>) => {
+    const handleConfirm = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        //TODO
+        const {
+            user: { firstName, lastName, email, address, zipcode, city, state },
+        } = props
+        try {
+            setPasswordError('')
+            const userCheck = await userApi.login(user.email, password)
+
+            if (!userCheck.user._id) {
+                setPasswordError('Wrong Password')
+                return
+            }
+
+            const res = await userApi.updateUser({
+                ...user,
+                firstName,
+                lastName,
+                email,
+                address,
+                zipcode,
+                city,
+                state,
+            })
+            if (!res._id) {
+                alert('Creating user failed!')
+                return
+            }
+            const newUser = await userApi.login(res.email, password)
+            setUser(newUser.user)
+            localStorage.setItem('token', newUser.token)
+            props.handleUpdate()
+            handleClose()
+            alert('Account updated!')
+        } catch {
+            alert('Account update failed!')
+        }
     }
 
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         const { value } = e.target
-        setPassword(value
-        )
+        setPassword(value)
     }
 
     return (
         <Modal
-            title="Change Password"
+            title="Confirm Password"
             open={modals.confirmPasswordModal}
             handleClose={handleClose}
         >
@@ -54,15 +93,15 @@ const ConfirmPassword = () => {
                     onChange={handleChange}
                 />
                 <Stack direction="row" spacing={2}>
-                    <Button variant="contained">
-                        <Stack
-                            direction="row"
-                            spacing={2}
-                            onClick={handleClose}
-                        >
+                    <Button
+                        variant="contained"
+                        onClick={handleClose}
+                        color="error"
+                    >
+                        <Grid2 container alignItems="center" spacing={1}>
                             <Cancel />
                             <Font variant="button">Cancel</Font>
-                        </Stack>
+                        </Grid2>
                     </Button>
                     <Button variant="contained" type="submit">
                         <Stack direction="row" spacing={2}>

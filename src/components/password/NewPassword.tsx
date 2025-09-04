@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
-import { selectModal } from '@/store/selectors.tsx'
+import { selectModal, selectUser } from '@/store/selectors.tsx'
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { toggleChangePasswordModal } from '@/store/slices.tsx'
+import { setUser, toggleChangePasswordModal } from '@/store/slices.tsx'
 import {
     Button,
     Grid2,
@@ -12,9 +12,11 @@ import {
 } from '@mui/material'
 import { Cancel } from '@mui/icons-material'
 import Modal from '@/components/modal/Modal.tsx'
+import userApi from '@/lib/api/userApi.ts'
 
 const NewPassword = () => {
     const modals = useAppSelector(selectModal)
+    const user = useAppSelector(selectUser)
     const dispatch = useAppDispatch()
     const [password, setPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
@@ -24,22 +26,44 @@ const NewPassword = () => {
     const handleClose = () => {
         dispatch(toggleChangePasswordModal())
     }
-    const handleConfirm = (e: FormEvent<HTMLFormElement>) => {
+    const handleConfirm = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        //TODO
-        if(newPassword !== confirmPassword) {
+        setPasswordError('')
+        if (newPassword !== confirmPassword) {
             setConfirmError("Passwords don't match")
             return
         }
+        try {
+            const verifiedUser = await userApi.login(user.email, password)
+            if (!verifiedUser.user._id) {
+                setPasswordError('Incorrect password')
+                return
+            }
+            console.table([user, user])
+            const res = await userApi.updateUser({
+                ...user,
+                password: newPassword,
+            })
+            if (res._id) {
+                const updatedUser = await userApi.login(user.email, newPassword)
+                localStorage.setItem('token', updatedUser.token)
+                dispatch(setUser(updatedUser.user))
+                alert('Password updated successfully')
+                handleClose()
+            }
+            alert('Failed to update password')
+        } catch {
+            alert('Failed to update password')
+        }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         setConfirmError('')
-    },[newPassword, confirmPassword])
+    }, [newPassword, confirmPassword])
 
-    useEffect(()=>{
+    useEffect(() => {
         setPasswordError('')
-    },[password])
+    }, [password])
 
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target
@@ -105,15 +129,15 @@ const NewPassword = () => {
                     spacing={2}
                     justifyContent="space-between"
                 >
-                    <Button variant="contained">
-                        <Stack
-                            direction="row"
-                            spacing={2}
-                            onClick={handleClose}
-                        >
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleClose}
+                    >
+                        <Grid2 container alignItems="center" spacing={2}>
                             <Cancel />
                             <Font variant="button">Cancel</Font>
-                        </Stack>
+                        </Grid2>
                     </Button>
                     <Button variant="contained" type="submit">
                         <Stack direction="row" spacing={2}>

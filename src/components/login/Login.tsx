@@ -20,6 +20,7 @@ import {
     toggleWelcomeModal,
 } from '@/store/slices.tsx'
 import { FormEvent, useEffect, useState } from 'react'
+import userApi from '@/lib/api/userApi.ts'
 
 const Login = () => {
     const modals = useAppSelector(selectModal)
@@ -41,18 +42,14 @@ const Login = () => {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setLoading(true)
-        const res = await fetch('/api/user/login/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, remember }),
-        })
+        const res = await userApi.login(email, password)
         setLoading(false)
         if (res.status === 400 || res.status === 500) {
             const errorRes = await res.json()
             setLoginError(errorRes.error)
             return
         }
-        const { user, token } = await res.json()
+        const { user, token } = res
         localStorage.setItem('token', token)
         dispatch(toggleLoginModal())
         dispatch(setUser(user))
@@ -126,6 +123,7 @@ const Login = () => {
                                 checked={useSample}
                                 onClick={() => handleSample()}
                                 disabled={useSampleVendor}
+                                id={'user-login-checkbox'}
                             />
                         }
                         label="Use Sample User Login"
@@ -171,6 +169,7 @@ const Login = () => {
                     fullWidth
                     type="submit"
                     loading={loading}
+                    id="login-button"
                 >
                     Sign in
                 </Button>
@@ -185,7 +184,7 @@ const Login = () => {
                         Sign up
                     </Button>
                     <Button variant="contained" fullWidth onClick={handleGuest}>
-                        Order as Guest
+                        Browse Menu
                     </Button>
                 </Stack>
             </Grid2>

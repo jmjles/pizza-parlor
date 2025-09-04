@@ -5,12 +5,16 @@ import { toggleCartModal } from '@/store/slices.tsx'
 import { useAppSelector } from '@/store/hooks.tsx'
 import { selectModal } from '@/store/selectors.tsx'
 
-const CartModal = () =>{
+const CartModal = () => {
     const modals = useAppSelector(selectModal)
     const dispatch = useDispatch()
     const handleClose = () => {
         dispatch(toggleCartModal())
     }
-    return (<Modal title={""} open={modals.cartModal} handleClose={handleClose}><Cart/></Modal>)
+    return (
+        <Modal title={''} open={modals.cartModal} handleClose={handleClose}>
+            <Cart />
+        </Modal>
+    )
 }
 export default CartModal

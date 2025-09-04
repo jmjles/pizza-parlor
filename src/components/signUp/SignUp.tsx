@@ -1,18 +1,14 @@
-import Modal, { ModalPropType } from '@/components/modal/Modal'
-import { ArrowBack, ArrowForward, LocalPizza, Send } from '@mui/icons-material'
-import {
-    Button,
-    Checkbox,
-    Divider,
-    FormControlLabel,
-    Grid2,
-    Stack,
-    TextField,
-    Typography as Font,
-} from '@mui/material'
+import Modal from '@/components/modal/Modal'
+import { ArrowBack, ArrowForward, Send } from '@mui/icons-material'
+import { Button, Divider, Grid2, Stack, TextField } from '@mui/material'
 import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
 import { selectModal, selectStore } from '@/store/selectors.tsx'
-import { setUser, toggleLoginModal, toggleSignupModal, toggleStoreModal } from '@/store/slices.tsx'
+import {
+    setUser,
+    toggleLoginModal,
+    toggleSignupModal,
+    toggleStoreModal,
+} from '@/store/slices.tsx'
 import { ChangeEvent, FormEvent, useState } from 'react'
 
 const SignUp = () => {
@@ -90,8 +86,8 @@ const SignUp = () => {
         if (res.status !== 201) {
             return
         }
-        const {user,token} = await res.json()
-        localStorage.setItem("token", token)
+        const { user, token } = await res.json()
+        localStorage.setItem('token', token)
         dispatch(setUser(user))
         dispatch(toggleSignupModal())
         dispatch(toggleStoreModal())
@@ -228,11 +224,19 @@ const SignUp = () => {
                         </Button>
                     )}
                     {step === 1 ? (
-                        <Button variant="contained" onClick={handleStepForward}>
+                        <Button
+                            variant="contained"
+                            onClick={handleStepForward}
+                            disabled={loading}
+                        >
                             Next <ArrowForward />
                         </Button>
                     ) : (
-                        <Button variant="contained" type="submit" loading={loading}>
+                        <Button
+                            variant="contained"
+                            type="submit"
+                            loading={loading}
+                        >
                             Sign Up <Send />
                         </Button>
                     )}
