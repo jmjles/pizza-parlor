@@ -1,41 +1,44 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 declare global {
-    var mongoose: any; // This must be a `var` and not a `let / const`
+    var mongoose: any // This must be a `var` and not a `let / const`
 }
 
-let cached = global.mongoose;
+let cached = global?.mongoose
 
 if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
+    cached = global.mongoose = { conn: null, promise: null }
 }
 
 async function dbConnect() {
-    const MONGODB_URI = process.env.MongoDBURI!;
+    const MONGODB_URI = process.env.MongoDBURI!
 
     if (!MONGODB_URI) {
-        throw new Error("Missing MongoDB URI");
+        throw new Error('Missing MongoDB URI')
     }
     if (cached.conn) {
-        return cached.conn;
+        return cached.conn
     }
 
     if (!cached.promise) {
-        const opts = {
+        const opts: mongoose.ConnectOptions = {
             bufferCommands: false,
-        };
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            return mongoose;
-        });
+        }
+
+        cached.promise = mongoose
+            .connect(MONGODB_URI, opts)
+            .then((mongoose) => {
+                return mongoose
+            })
     }
 
     try {
-        cached.conn = await cached.promise;
+        cached.conn = await cached.promise
     } catch (e) {
-        cached.promise = null;
-        throw e;
+        cached.promise = null
+        throw e
     }
 
-    return cached.conn;
+    return cached.conn
 }
 
-export default dbConnect;
+export default dbConnect

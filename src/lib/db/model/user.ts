@@ -1,6 +1,8 @@
 import mongoose from 'mongoose'
+import { OrderType } from '@/lib/db/model/order.ts'
+import { ItemType } from '@/lib/classes/Item.ts'
 
-export interface User extends mongoose.Document {
+export interface UserType extends ItemType {
     firstName: string
     lastName: string
     email: string
@@ -11,9 +13,10 @@ export interface User extends mongoose.Document {
     profileIMG: string
     type: string
     password: string
+    orders: OrderType[]
 }
 
-const UserSchema = new mongoose.Schema<User>({
+const UserSchema = new mongoose.Schema<UserType>({
     firstName: {
         type: String,
         required: true,
@@ -54,7 +57,8 @@ const UserSchema = new mongoose.Schema<User>({
     password: {
         type: String,
         required: true,
-    }
+    },
 })
 
-export default mongoose.models.User || mongoose.model<User>('User', UserSchema)
+export default mongoose.models.User ||
+    mongoose.model<UserType>('User', UserSchema)
