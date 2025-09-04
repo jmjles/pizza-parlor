@@ -15,14 +15,17 @@ const Welcome = () => {
     const handleClose = () => {
         dispatch(toggleWelcomeModal())
     }
+
     const browseMenu = () => {
         handleClose()
         dispatch(toggleStoreModal())
     }
+
     const openLogin = () => {
         handleClose()
         dispatch(toggleLoginModal())
     }
+
     return (
         <Modal
             title="Pizza Parlor"
@@ -46,6 +49,7 @@ const Welcome = () => {
                             variant="contained"
                             color="primary"
                             onClick={browseMenu}
+                            id="browse-menu-button"
                         >
                             Browse Menu
                         </Button>
@@ -55,6 +59,7 @@ const Welcome = () => {
                             variant="contained"
                             color="primary"
                             onClick={openLogin}
+                            id="order-now-button"
                         >
                             Order Now
                         </Button>
