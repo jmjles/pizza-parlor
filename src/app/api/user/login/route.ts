@@ -11,7 +11,7 @@ export async function POST(req: Request, res: Response) {
         if (user) {
             if (await bcrypt.compare(password, user.password)) {
                 const {
-                    _doc: { password, _id, __v, ...secureUser },
+                    _doc: { password, __v, ...secureUser },
                 } = user
                 const token = await jwt.sign(
                     { data: secureUser },
@@ -19,7 +19,7 @@ export async function POST(req: Request, res: Response) {
                     { expiresIn: remember ? '30d' : '24h' }
                 )
                 return new Response(
-                    JSON.stringify({ user: secureUser, token }),
+                    JSON.stringify({ user: { ...secureUser }, token }),
                     { status: 200 }
                 )
             }

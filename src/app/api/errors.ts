@@ -13,3 +13,8 @@ export const failedToCreateUserError = () =>
     new Response(JSON.stringify({ error: 'All fields are required' }), {
         status: 400,
     })
+
+export const authError = () =>
+    new Response(JSON.stringify({ error: 'Authentication failed' }), {
+        status: 400,
+    })
