@@ -1,47 +1,49 @@
-import { Card, Stack, SvgIconTypeMap,Typography as Font } from '@mui/material'
-import { OverridableComponent } from '@mui/types'
+import { Button, Stack, Typography as Font } from '@mui/material'
+import Icon from '@/components/Icon/Icon.tsx'
+import { IngredientType } from '@/lib/classes/Ingredient.ts'
 
-const Ingredient = (props:IngredientProps)=> {
-    const {ingredient,onSelect,selected} = props;
-    return(
-        <Card onClick={()=> onSelect(ingredient)}>
-            <Stack>
-                {
-                    typeof ingredient.icon === "string" ?
-                        <>
-                        </>
-                        :
-                        <ingredient.icon fontSize="large" />
-                }
-                <Font variant="h5">{ingredient.name}</Font>
-                {(selected !== -1 && ingredient.IngredientOptions) &&
-                    <>
-                        <Font>{ingredient.IngredientOptions[selected].quantity}</Font>
-                        <Font>+ $ {ingredient.IngredientOptions[selected].price}</Font>
-                    </>
-                }
+const Ingredient = (props: IngredientProps) => {
+    const { ingredient, onSelect, selected, isSelected } = props
+    const show = selected !== -1 && ingredient.IngredientOptions
+    return (
+        <Button
+            onClick={() => onSelect(ingredient)}
+            sx={{ width: 150 }}
+            variant={isSelected ? 'contained' : 'outlined'}
+        >
+            <Stack alignItems="center">
+                <Icon name={ingredient.icon} size="medium" />
+                <Font variant="button">{ingredient.name}</Font>
+                <Font visibility={show ? 'visible' : 'hidden'}>
+                    {ingredient.IngredientOptions?.[selected]?.quantity}
+                </Font>
+                <Font visibility={show ? 'visible' : 'hidden'}>
+                    + $ {ingredient.IngredientOptions?.[selected]?.price}
+                </Font>
             </Stack>
-        </Card>
+        </Button>
     )
 }
 type IngredientProps = {
-    ingredient:IngredientType;
-    onSelect: (x:IngredientType) => void;
-    selected:number;
+    ingredient: IngredientType
+    onSelect: (x: IngredientType) => void
+    selected: number
+    isSelected: boolean
 }
 
-type IngredientQuantityLevel = "none" | "light" | "normal" | "extra" | "double";
+// type IngredientQuantityLevel = "none" | "light" | "normal" | "extra" | "double";
+//
+// type IngredientOption = {
+//     quantity: IngredientQuantityLevel;
+//     price: number;
+// };
+//
+// export type IngredientType = {
+//     name: string;
+//     icon: IconNameType;
+//     IngredientOptions: IngredientOption[] | null; // null if exclusive
+//     isExclusive?: boolean; // mark true for crust/sauce
+//     id:number
+// };
 
-type IngredientOption = {
-    quantity: IngredientQuantityLevel;
-    price: number;
-};
-
-export type IngredientType = {
-    name: string;
-    icon: OverridableComponent<SvgIconTypeMap> | string;
-    IngredientOptions: IngredientOption[] | null; // null if exclusive
-    isExclusive?: boolean; // mark true for crust/sauce
-};
-
-export default Ingredient;
+export default Ingredient

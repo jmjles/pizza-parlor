@@ -1,7 +1,20 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+    serverExternalPackages: ['mongoose'],
+    experimental: {
+        nodeMiddleware: true,
+    },
+    // and the following to enable top-level await support for Webpack
+    webpack: (config) => {
+        config.experiments = {
+            topLevelAwait: true,
+            layers:true
+        }
+        return config
+    },
+    turbopack: {},
+}
 
-export default nextConfig;
+export default nextConfig
+;``

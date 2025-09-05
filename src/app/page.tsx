@@ -1,82 +1,164 @@
 'use client'
-import { Grid2 } from '@mui/material'
-import Menu from '@/components/menu/Menu'
-import Bar from '@/components/bar/Bar'
-import Cart from '@/components/cart/Cart'
-import { pizzas, storeSampleData } from '@/assets/sampleData'
-
-import Stores from '@/components/stores/Stores'
+import CustomerDashboard from '@/components/customerDashboard/CustomerDashboard.tsx'
+import Welcome from '@/components/welcome/Welcome.tsx'
+import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
+import {
+    selectIngredient,
+    selectItem,
+    selectModal,
+    selectStore,
+    selectUser,
+} from '@/store/selectors.tsx'
+import Stores from '@/components/stores/Stores.tsx'
+import Login from '@/components/login/Login.tsx'
+import SignUp from '@/components/signUp/SignUp.tsx'
+import CartModal from '@/components/cart/CartModal.tsx'
+import User from '@/components/user/User.tsx'
+import NewPassword from '@/components/password/NewPassword.tsx'
 import { useEffect, useState } from 'react'
-import { StoreType } from '@/components/stores/Store'
-import ItemCustomization from '@/components/itemCustomization/ItemCustomization'
-import Login from '@/components/login/Login'
-import SignUp from '@/components/signUp/SignUp'
-import Order from '@/components/order/Order'
-import { MenuItemType } from '@/components/menuItem/MenuItem'
+import {
+    setIngredient,
+    setIngredients,
+    setItems,
+    setStore,
+    setStores,
+    setUser,
+    setWelcomeModal,
+    toggleStoreModal,
+} from '@/store/slices.tsx'
+import { storeApi } from '@/lib/api/storeApi.ts'
+import authApi from '@/lib/api/authApi.ts'
+import VendorDashboard from '@/components/vendorDashboard/VendorDashboard.tsx'
+import ingredientApi from '@/lib/api/ingredientApi.ts'
+import menuItemApi from '@/lib/api/menuItemApi.ts'
+import PastOrders from '@/components/order/PastOrders.tsx'
 
 export default function Home() {
-    const [storeModal, setStoreModal] = useState(false)
-    const [selectedStore, setSelectedStore] = useState<StoreType>()
-    const [orderModal, setOrderModal] = useState(false)
-    const [itemModal, setItemModal] = useState(false)
-    const [selectedItem, setSelectedItem] = useState<MenuItemType>()
-    const [size, setSize] = useState(-1)
+    const [loading, setLoading] = useState(true)
+    const { stores, store, refreshStores } = useAppSelector(selectStore)
+    const { menuItem, refreshMenuItems } = useAppSelector(selectItem)
+    const { ingredient, refreshIngredients } = useAppSelector(selectIngredient)
+    const modals = useAppSelector(selectModal)
+    const user = useAppSelector(selectUser)
+    const dispatch = useAppDispatch()
+    const showWelcome = () => !user.email && !loading && modals.welcomeModal
+
+    const showDashboard = () =>
+        !modals.signupModal &&
+        !modals.loginModal &&
+        !modals.welcomeModal &&
+        user.type !== 'exampleVendor' &&
+        user.type !== 'vendor'
+
+    const showVendorDashboard = () =>
+        !modals.signupModal &&
+        !modals.loginModal &&
+        !showWelcome() &&
+        user.type !== 'example' &&
+        user.type !== 'customer'
+    const showLogin = () => modals.loginModal
+    const showSignup = () => modals.signupModal
+    const showUser = () => modals.userModal
+    const showStore = () => modals.storeModal && user.type !== 'exampleVendor'
+    const showOrders = () => modals.pastOrderModal
+    useEffect(() => {
+        if (!user.email) return
+        dispatch(setWelcomeModal(false))
+    }, [user])
 
     useEffect(() => {
-        if (!itemModal) setSize(-1)
-    }, [itemModal])
+        setLoading(true)
+        const token = localStorage.getItem('token')
+        const verifyToken = async () => {
+            if (token && !user.email) {
+                setLoading(true)
+                const fetchedUser = await authApi.verifyToken()
+                if ('error' in fetchedUser) {
+                    localStorage.removeItem('token')
+                    setLoading(false)
+                    return
+                }
+                dispatch(setUser(fetchedUser))
+                dispatch(toggleStoreModal())
+            }
+            setLoading(false)
+        }
+        verifyToken()
+    }, [user])
 
-    const handleStoreModal = () => {
-        setStoreModal(p => !p)
-    }
+    useEffect(() => {
+        const getStores = async () => {
+            try {
+                const storesRes = await storeApi.getStores()
+                if (!storesRes.length) {
+                    dispatch(setStores([]))
+                    return
+                }
+                if (store._id) {
+                    const updatedStore = storesRes.find(
+                        (s: any) => s._id === store._id
+                    )
+                    if (updatedStore) dispatch(setStore(updatedStore))
+                }
+                dispatch(setStores(storesRes))
+            } catch (e: any) {}
+        }
+        getStores()
+    }, [refreshStores, user])
 
-    const handleOrderModal = () => {
-        setOrderModal(p => !p)
-    }
+    useEffect(() => {
+        const getIngredients = async () => {
+            try {
+                const ingredientsRes = await ingredientApi.getIngredients()
+                if ('status' in ingredientsRes) {
+                    dispatch(setIngredients([]))
+                    return
+                }
+                if (ingredient._id) {
+                    const updatedIngredient = ingredientsRes.find(
+                        (i: any) => i._id === ingredient._id
+                    )
+                    if (updatedIngredient)
+                        dispatch(setIngredient(updatedIngredient))
+                }
+                dispatch(setIngredients(ingredientsRes))
+            } catch (e: any) {}
+        }
+        getIngredients()
+    }, [refreshIngredients, user])
 
-    const handleItemModal = () => {
-        setItemModal(p => !p)
-    }
-
-    const handleItemSelect = (item: MenuItemType, size: number) => {
-        setSelectedItem(item)
-        setSize(size)
-        handleItemModal()
-    }
-
-    const handleStore = (store: StoreType) => {
-        setSelectedStore(store)
-        handleStoreModal()
-    }
+    useEffect(() => {
+        const getItems = async () => {
+            try {
+                const itemsRes = await menuItemApi.getMenuItems()
+                if ('status' in itemsRes) {
+                    dispatch(setItems([]))
+                    return
+                }
+                if (itemsRes.id) {
+                    const updatedItem = itemsRes.find(
+                        (s: any) => s._id === menuItem._id
+                    )
+                    if (updatedItem) dispatch(setStore(updatedItem))
+                }
+                dispatch(setItems(itemsRes))
+            } catch (e: any) {}
+        }
+        getItems()
+    }, [refreshMenuItems, user])
 
     return (
         <div>
-            <Grid2 container flexDirection="column" wrap="nowrap">
-                <Grid2>
-                    <Bar city={selectedStore?.city ? selectedStore.city : 'Pizza Parlor'}
-                         location={selectedStore?.city ? `${selectedStore.streetAddress}, ${selectedStore.state} ${selectedStore.zipcode}` : 'Select a Store'}
-                         openLocations={handleStoreModal} />
-                </Grid2>
-                <Grid2>
-                    <Grid2 container justifyContent="space-around" direction="row" wrap="nowrap" marginTop={2}>
-                        <Grid2 size={{ xs: 12, lg: 10, xl: 9 }} height="calc(100vh - 87.9833px - 32px)" overflow="auto">
-                            <Menu items={pizzas} onSelect={handleItemSelect} />
-                        </Grid2>
-                        <Grid2 size={{ xl: 2 }} display={{ xs: 'none', xl: 'initial' }}>
-                            <Cart />
-                        </Grid2>
-                    </Grid2>
-                </Grid2>
-            </Grid2>
-            <Stores stores={storeSampleData} modal={{ open: storeModal, handleClose: handleStoreModal }}
-                    selectedStore={selectedStore} selectStore={handleStore} />
-            {(selectedItem && itemModal) &&
-                <ItemCustomization item={selectedItem} modal={{ open: itemModal, handleClose: handleItemModal }}
-                                   size={size} />}
-            {/*<Login modal={{ open: true, handleClose: '' }} />*/}
-            {/*<SignUp modal={{ open: true, handleClose: '' }} />*/}
-            <Order modal={{ open: orderModal, handleClose: handleOrderModal }} selectedStore={selectedStore}
-                   storeModal={handleStoreModal} />
+            {showDashboard() && <CustomerDashboard />}
+            {showVendorDashboard() && <VendorDashboard />}
+            {showStore() && <Stores stores={stores} />}
+            {showLogin() && <Login />}
+            {showSignup() && <SignUp />}
+            {showWelcome() && <Welcome />}
+            <CartModal />
+            {showUser() && <User />}
+            {modals.changePasswordModal && <NewPassword />}
+            {showOrders() && <PastOrders />}
         </div>
     )
 }

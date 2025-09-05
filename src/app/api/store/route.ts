@@ -1,0 +1,21 @@
+import Store from '@/lib/db/model/store.ts'
+import { CallQuery } from '@/app/api/utils.ts'
+import menuItem from '@/lib/db/model/menuItem.ts'
+
+export async function POST(req: Request) {
+    return await new CallQuery(req, Store).setVendorOnly().create()
+}
+export async function GET(req: Request) {
+    menuItem
+    return await new CallQuery(req, Store)
+        .setPopulate([{ path: 'menu', populate: [{ path: 'items' }] }])
+        .readAll()
+}
+
+export async function DELETE(req: Request) {
+    return await new CallQuery(req, Store).setVendorOnly().delete()
+}
+
+export async function PUT(req: Request) {
+    return await new CallQuery(req, Store).setVendorOnly().update()
+}
