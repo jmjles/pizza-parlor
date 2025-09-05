@@ -6,7 +6,7 @@ const gravatar = require('gravatar')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
     try {
         const data = await req.json()
         data.profileIMG = gravatar.url(

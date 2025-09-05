@@ -3,10 +3,10 @@ import MenuItem from '@/lib/db/model/menuItem.ts'
 import Ingredient from '@/lib/db/model/ingredient.ts'
 import MenuCategory from '@/lib/db/model/menuCategory.ts'
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
     return await new CallQuery(req, MenuItem).setVendorOnly().create()
 }
-export async function GET(req: Request, res: Response) {
+export async function GET(req: Request) {
     Ingredient
     MenuCategory
     return await new CallQuery(req, MenuItem)
@@ -18,10 +18,10 @@ export async function GET(req: Request, res: Response) {
         .readAll()
 }
 
-export async function DELETE(req: Request, res: Response) {
+export async function DELETE(req: Request) {
     return await new CallQuery(req, MenuItem).setVendorOnly().delete()
 }
 
-export async function PUT(req: Request, res: Response) {
+export async function PUT(req: Request) {
     return await new CallQuery(req, MenuItem).setVendorOnly().update()
 }

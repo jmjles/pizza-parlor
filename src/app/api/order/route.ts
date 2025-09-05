@@ -3,11 +3,11 @@ import Order from '@/lib/db/model/order.ts'
 import MenuItem from '@/lib/db/model/menuItem.ts'
 import Store from '@/lib/db/model/store.ts'
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
     return await new CallQuery(req, Order).create()
 }
 
-export async function GET(req: Request, res: Response) {
+export async function GET(req: Request) {
     MenuItem
     Store
     return await new CallQuery(req, Order)
@@ -22,10 +22,10 @@ export async function GET(req: Request, res: Response) {
         .readAll()
 }
 
-export async function DELETE(req: Request, res: Response) {
+export async function DELETE(req: Request) {
     return await new CallQuery(req, Order).setVendorOnly().delete()
 }
 
-export async function PUT(req: Request, res: Response) {
+export async function PUT(req: Request) {
     return await new CallQuery(req, Order).setVendorOnly().update()
 }

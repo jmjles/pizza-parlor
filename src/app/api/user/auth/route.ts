@@ -1,10 +1,9 @@
 import User from '@/lib/db/model/user.ts'
 import dbConnect from '@/lib/db/connectDB.ts'
 import { serverError, wrongCredentialsError } from '@/app/api/errors.ts'
-import { CallQuery } from '@/app/api/utils.ts'
 const jwt = require('jsonwebtoken')
 
-export async function GET(req: Request, res: Response) {
+export async function GET(req: Request) {
     try {
         const token = await req.headers.get('Authorization')?.split(' ')[1]
         await dbConnect()

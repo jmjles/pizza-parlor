@@ -3,7 +3,7 @@ import Order from '@/lib/db/model/order.ts'
 import Store from '@/lib/db/model/store.ts'
 import menuItem from '@/lib/db/model/menuItem.ts'
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
     Store
     menuItem
     return await new CallQuery(req, Order)

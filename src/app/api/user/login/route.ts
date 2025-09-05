@@ -3,7 +3,7 @@ import dbConnect from '@/lib/db/connectDB.ts'
 import { serverError, wrongCredentialsError } from '@/app/api/errors.ts'
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
     try {
         const { email, password, remember } = await req.json()
         await dbConnect()
