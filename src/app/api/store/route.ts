@@ -1,12 +1,14 @@
 import Store from '@/lib/db/model/store.ts'
 import { CallQuery } from '@/app/api/utils.ts'
 import menuItem from '@/lib/db/model/menuItem.ts'
+import MenuCategory from '@/lib/db/model/menuCategory.ts'
 
 export async function POST(req: Request) {
     return await new CallQuery(req, Store).setVendorOnly().create()
 }
 export async function GET(req: Request) {
     menuItem
+    MenuCategory
     return await new CallQuery(req, Store)
         .setPopulate([{ path: 'menu', populate: [{ path: 'items' }] }])
         .readAll()
