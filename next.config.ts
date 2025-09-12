@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     webpack: (config) => {
         config.experiments = {
             topLevelAwait: true,
-            layers:true
+            layers: true,
         }
         return config
     },

@@ -3,7 +3,6 @@ import { CssBaseline } from '@mui/material'
 import brickWall from '@/assets/images/bricks.jpg'
 import StoreProvider from '@/store/StoreProvider.tsx'
 
-
 export const metadata: Metadata = {
     title: 'Pizza Parlor',
     description: 'Online POS System',
