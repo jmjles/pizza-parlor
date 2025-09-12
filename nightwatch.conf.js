@@ -12,84 +12,82 @@
 //            |___/
 
 module.exports = {
-    // An array of folders (excluding subfolders) where your tests are located;
-    // if this is not specified, the test source must be passed as the second argument to the test runner.
-    src_folders: ['tests', 'nightwatch'],
+  // An array of folders (excluding subfolders) where your tests are located;
+  // if this is not specified, the test source must be passed as the second argument to the test runner.
+  src_folders: ['tests','nightwatch'],
 
-    // See https://nightwatchjs.org/guide/concepts/page-object-model.html
-    page_objects_path: [],
+  // See https://nightwatchjs.org/guide/concepts/page-object-model.html
+  page_objects_path: [],
 
-    // See https://nightwatchjs.org/guide/extending-nightwatch/adding-custom-commands.html
-    custom_commands_path: [],
+  // See https://nightwatchjs.org/guide/extending-nightwatch/adding-custom-commands.html
+  custom_commands_path: [],
 
-    // See https://nightwatchjs.org/guide/extending-nightwatch/adding-custom-assertions.html
-    custom_assertions_path: [],
+  // See https://nightwatchjs.org/guide/extending-nightwatch/adding-custom-assertions.html
+  custom_assertions_path: [],
 
-    // See https://nightwatchjs.org/guide/extending-nightwatch/adding-plugins.html
-    plugins: [],
+  // See https://nightwatchjs.org/guide/extending-nightwatch/adding-plugins.html
+  plugins: [],
+  
+  // See https://nightwatchjs.org/guide/concepts/test-globals.html
+  globals_path: '',
+  
+  webdriver: {},
 
-    // See https://nightwatchjs.org/guide/concepts/test-globals.html
-    globals_path: '',
+  test_workers: {
+    enabled: true
+  },
 
-    webdriver: {
+  test_settings: {
+    default: {
+      disable_error_log: false,
+      launch_url: 'http://localhost:3000',
+
+      screenshots: {
+        enabled: false,
+        path: 'screens',
+        on_failure: true
+      },
+
+      desiredCapabilities: {
+        browserName: 'chrome'
+      },
+      
+      webdriver: {
         start_process: true,
-        server_path: 'node_modules/chromedriver/lib/chromedriver/chromedriver',
-        port: 5000,
+        server_path: ''
+      },
+      
     },
+    
+    chrome: {
+      desiredCapabilities: {
+        browserName: 'chrome',
+        'goog:chromeOptions': {
+          // More info on Chromedriver: https://sites.google.com/a/chromium.org/chromedriver/
+          args: [
+            //'--no-sandbox',
+            //'--ignore-certificate-errors',
+            //'--allow-insecure-localhost',
+            //'--headless=new'
+          ]
+        }
+      },
 
-    test_workers: {
-        enabled: true,
+      webdriver: {
+        start_process: true,
+        server_path: '',
+        cli_args: [
+          // --verbose
+        ]
+      }
     },
-
-    test_settings: {
-        default: {
-            disable_error_log: false,
-            launch_url: 'http://localhost:3000',
-
-            screenshots: {
-                enabled: false,
-                path: 'screens',
-                on_failure: true,
-            },
-
-            desiredCapabilities: {
-                browserName: 'chrome',
-            },
-
-            webdriver: {
-                start_process: true,
-                server_path: '',
-            },
-        },
-
-        chrome: {
-            desiredCapabilities: {
-                browserName: 'chrome',
-                w3c: false,
-                'goog:chromeOptions': {
-                    // More info on Chromedriver: https://sites.google.com/a/chromium.org/chromedriver/
-                    args: [
-                        //'--no-sandbox',
-                        //'--ignore-certificate-errors',
-                        //'--allow-insecure-localhost',
-                        //'--headless=new'
-                    ],
-                },
-            },
-
-            webdriver: {
-                start_process: true,
-                server_path: '',
-                cli_args: [
-                    // --verbose
-                ],
-            },
-        },
-    },
-
-    usage_analytics: {
-        enabled: true,
-        log_path: './logs/analytics',
-        client_id: 'aa5931b0-df1c-4eb1-966b-03b91a2fb997',
-    },
-}
+    
+  },
+  
+  usage_analytics: {
+    enabled: true,
+    log_path: './logs/analytics',
+    client_id: '05799aca-2c4f-4837-9c41-7518c9262cbd'
+  }
+  
+};

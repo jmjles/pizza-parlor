@@ -7,6 +7,7 @@ import {
     userSlice,
     ingredientSlice,
     orderSlice,
+    loadingSlice,
 } from '@/store/slices.tsx'
 
 export const makeStore = () => {
@@ -19,6 +20,7 @@ export const makeStore = () => {
             user: userSlice.reducer,
             ingredient: ingredientSlice.reducer,
             order: orderSlice.reducer,
+            loading: loadingSlice.reducer,
         },
     })
 }

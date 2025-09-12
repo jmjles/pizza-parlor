@@ -59,3 +59,5 @@ export const selectOrder = createSelector(_selectOrder, (state) => {
         loading,
     }
 })
+
+export const selectLoading = (state: RootState) => state.loading

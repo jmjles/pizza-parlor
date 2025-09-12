@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
 import {
     selectIngredient,
     selectItem,
+    selectLoading,
     selectModal,
     selectStore,
     selectUser,
@@ -15,7 +16,7 @@ import SignUp from '@/components/signUp/SignUp.tsx'
 import CartModal from '@/components/cart/CartModal.tsx'
 import User from '@/components/user/User.tsx'
 import NewPassword from '@/components/password/NewPassword.tsx'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import {
     setIngredient,
     setIngredients,
@@ -24,6 +25,10 @@ import {
     setStores,
     setUser,
     setWelcomeModal,
+    toggleLoadingIngredients,
+    toggleLoadingMenuItems,
+    toggleLoadingStores,
+    toggleLoadingUsers,
     toggleStoreModal,
 } from '@/store/slices.tsx'
 import { storeApi } from '@/lib/api/storeApi.ts'
@@ -32,16 +37,23 @@ import VendorDashboard from '@/components/vendorDashboard/VendorDashboard.tsx'
 import ingredientApi from '@/lib/api/ingredientApi.ts'
 import menuItemApi from '@/lib/api/menuItemApi.ts'
 import PastOrders from '@/components/order/PastOrders.tsx'
+import Loading from '@/components/loading/Loading.tsx'
 
 export default function Home() {
-    const [loading, setLoading] = useState(true)
     const { stores, store, refreshStores } = useAppSelector(selectStore)
     const { menuItem, refreshMenuItems } = useAppSelector(selectItem)
     const { ingredient, refreshIngredients } = useAppSelector(selectIngredient)
+    const {
+        initialLoad,
+        loadingIngredients,
+        loadingStores,
+        loadingUsers,
+        loadingMenuItems,
+    } = useAppSelector(selectLoading)
     const modals = useAppSelector(selectModal)
     const user = useAppSelector(selectUser)
     const dispatch = useAppDispatch()
-    const showWelcome = () => !user.email && !loading && modals.welcomeModal
+    const showWelcome = () => !user.email && !initialLoad && modals.welcomeModal
 
     const showDashboard = () =>
         !modals.signupModal &&
@@ -67,27 +79,28 @@ export default function Home() {
     }, [user])
 
     useEffect(() => {
-        setLoading(true)
         const token = localStorage.getItem('token')
         const verifyToken = async () => {
-            if (token && !user.email) {
-                setLoading(true)
-                const fetchedUser = await authApi.verifyToken()
-                if ('error' in fetchedUser) {
-                    localStorage.removeItem('token')
-                    setLoading(false)
-                    return
+            try {
+                if (!loadingUsers) dispatch(toggleLoadingUsers())
+                if (token && !user.email) {
+                    const fetchedUser = await authApi.verifyToken()
+                    if ('error' in fetchedUser) {
+                        localStorage.removeItem('token')
+                        return
+                    }
+                    dispatch(setUser(fetchedUser))
+                    dispatch(toggleStoreModal())
                 }
-                dispatch(setUser(fetchedUser))
-                dispatch(toggleStoreModal())
-            }
-            setLoading(false)
+            } catch (e: any) {}
+            dispatch(toggleLoadingUsers())
         }
         verifyToken()
     }, [user])
 
     useEffect(() => {
         const getStores = async () => {
+            if (!loadingStores) dispatch(toggleLoadingStores())
             try {
                 const storesRes = await storeApi.getStores()
                 if (!storesRes.length) {
@@ -102,6 +115,7 @@ export default function Home() {
                 }
                 dispatch(setStores(storesRes))
             } catch (e: any) {}
+            dispatch(toggleLoadingStores())
         }
         getStores()
     }, [refreshStores, user])
@@ -109,6 +123,7 @@ export default function Home() {
     useEffect(() => {
         const getIngredients = async () => {
             try {
+                if (!loadingIngredients) dispatch(toggleLoadingIngredients())
                 const ingredientsRes = await ingredientApi.getIngredients()
                 if ('status' in ingredientsRes) {
                     dispatch(setIngredients([]))
@@ -123,6 +138,7 @@ export default function Home() {
                 }
                 dispatch(setIngredients(ingredientsRes))
             } catch (e: any) {}
+            dispatch(toggleLoadingIngredients())
         }
         getIngredients()
     }, [refreshIngredients, user])
@@ -130,6 +146,7 @@ export default function Home() {
     useEffect(() => {
         const getItems = async () => {
             try {
+                if (!loadingMenuItems) dispatch(toggleLoadingMenuItems())
                 const itemsRes = await menuItemApi.getMenuItems()
                 if ('status' in itemsRes) {
                     dispatch(setItems([]))
@@ -143,9 +160,13 @@ export default function Home() {
                 }
                 dispatch(setItems(itemsRes))
             } catch (e: any) {}
+            dispatch(toggleLoadingMenuItems())
         }
         getItems()
     }, [refreshMenuItems, user])
+
+    if (initialLoad) return <Loading />
+    if (showWelcome()) return <Welcome />
 
     return (
         <div>
@@ -154,7 +175,6 @@ export default function Home() {
             {showStore() && <Stores stores={stores} />}
             {showLogin() && <Login />}
             {showSignup() && <SignUp />}
-            {showWelcome() && <Welcome />}
             <CartModal />
             {showUser() && <User />}
             {modals.changePasswordModal && <NewPassword />}

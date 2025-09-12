@@ -219,3 +219,39 @@ export const orderSlice = createSlice({
 })
 
 export const { setOrder, setLoadingOrder, setOrders } = orderSlice.actions
+
+export const loadingSlice = createSlice({
+    name: 'loading',
+    initialState: {
+        loadingIngredients: true,
+        loadingUsers: true,
+        loadingStores: true,
+        loadingMenuItems: true,
+        initialLoad: true,
+        //loadingOrders:true
+    },
+    reducers: {
+        toggleLoadingIngredients: (state) => {
+            state.loadingIngredients = !state.loadingIngredients
+        },
+        toggleLoadingUsers: (state) => {
+            state.loadingUsers = !state.loadingUsers
+        },
+        toggleLoadingStores: (state) => {
+            state.loadingStores = !state.loadingStores
+        },
+        toggleInitialLoad: (state) => {
+            state.initialLoad = !state.initialLoad
+        },
+        toggleLoadingMenuItems: (state) => {
+            state.loadingMenuItems = !state.loadingMenuItems
+        },
+    },
+})
+export const {
+    toggleLoadingIngredients,
+    toggleLoadingStores,
+    toggleLoadingMenuItems,
+    toggleInitialLoad,
+    toggleLoadingUsers,
+} = loadingSlice.actions
