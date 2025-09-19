@@ -4,7 +4,7 @@ import { IngredientType } from '@/lib/classes/Ingredient.ts'
 const ingredientURL = '/api/ingredients'
 
 export default {
-    createIngredient: async (ingredient: IngredientType) => {
+    createIngredient: async (ingredient: Omit<IngredientType, '_id'>) => {
         const token = localStorage.getItem('token') || ''
         return await callApi(
             ingredientURL,
@@ -22,11 +22,11 @@ export default {
             createHeader({ token, method: 'PUT', body: { fields: ingredient } })
         )
     },
-    removeIngredient: async (id: string) => {
+    removeIngredient: async (_id: string) => {
         const token = localStorage.getItem('token') || ''
         return await callApi(
             ingredientURL,
-            createHeader({ token, method: 'DELETE', body: { fields: { id } } })
+            createHeader({ token, method: 'DELETE', body: { fields: { _id } } })
         )
     },
     getIngredients: async () => {
