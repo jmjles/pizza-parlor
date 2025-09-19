@@ -71,7 +71,7 @@ export default function Home() {
     const showLogin = () => modals.loginModal
     const showSignup = () => modals.signupModal
     const showUser = () => modals.userModal
-    const showStore = () => modals.storeModal && user.type !== 'exampleVendor'
+    const showStore = () => modals.storeModal && showDashboard()
     const showOrders = () => modals.pastOrderModal
     useEffect(() => {
         if (!user.email) return
@@ -152,7 +152,7 @@ export default function Home() {
                     dispatch(setItems([]))
                     return
                 }
-                if (itemsRes.id) {
+                if (itemsRes._id) {
                     const updatedItem = itemsRes.find(
                         (s: any) => s._id === menuItem._id
                     )

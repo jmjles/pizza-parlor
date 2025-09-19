@@ -19,7 +19,7 @@ const NewCategory = (props: ScreenProps) => {
     const [fieldData, setFieldData] = useState<MenuCategoryType>(
         menuItemInitialState['category']
     )
-
+    const [loading, setLoading] = useState(false)
     const { store } = useAppSelector(selectStore)
     const item = useAppSelector(selectItem)
 
@@ -36,21 +36,26 @@ const NewCategory = (props: ScreenProps) => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        const res = await menuCategoryApi.createMenuCategory(fieldData)
-        if (res.id) {
+        setLoading(true)
+        const { _id, ...data } = fieldData
+        const res = await menuCategoryApi.createMenuCategory(data)
+        if (res._id) {
             const resStore = await storeApi.editStore({
                 ...store,
-                menu: [...store.menu, res.id],
+                menu: [...store.menu, res._id],
             })
-            if (resStore.id) {
+            if (resStore._id) {
                 handleBack()
                 dispatch(refreshStores())
-                alert(`Ingredient created successfully`)
+                alert(`Menu category created successfully`)
+                setLoading(false)
                 return
             }
             alert(`Menu category created unsuccessfully`)
+            setLoading(false)
             return
         }
+        setLoading(false)
         alert(`Menu category created unsuccessfully`)
     }
 
@@ -88,6 +93,7 @@ const NewCategory = (props: ScreenProps) => {
             handleBack={handleBack}
             handleSubmit={handleSubmit}
             fields={fields}
+            loading={loading}
         />
     )
 }

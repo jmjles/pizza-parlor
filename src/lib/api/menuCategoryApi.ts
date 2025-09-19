@@ -27,11 +27,11 @@ export default {
             })
         )
     },
-    removeMenuCategory: async (id: string) => {
+    removeMenuCategory: async (_id: string) => {
         const token = localStorage.getItem('token') || ''
         return await callApi(
             menuCategoryUrl,
-            createHeader({ token, method: 'DELETE', body: { fields: id } })
+            createHeader({ token, method: 'DELETE', body: { fields: { _id } } })
         )
     },
     getMenuCategories: async () => {

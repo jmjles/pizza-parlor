@@ -115,7 +115,14 @@ const ListItem = (props: ListItemPropsType) => {
 
     return (
         <Button onClick={() => onClick(item)} fullWidth>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Grid2
+                container
+                alignItems="center"
+                spacing={2}
+                justifyContent="space-between"
+                wrap={'nowrap'}
+                width="100%"
+            >
                 <div style={{ width: '150px', flexShrink: 0 }}>
                     <img
                         src={item.image}
@@ -125,12 +132,11 @@ const ListItem = (props: ListItemPropsType) => {
                         loading="eager"
                     />
                 </div>
-
-                <Stack direction="column" flexGrow={1}>
+                <Stack flexGrow={1}>
                     <Font variant={'h6'}>{item.title}</Font>
                     <Font variant="subtitle2">{item.description}</Font>
                 </Stack>
-            </Stack>
+            </Grid2>
         </Button>
     )
 }

@@ -27,6 +27,7 @@ const NewIngredient = (props: NewIngredientProps) => {
     const [fieldData, setFieldData] = useState<IngredientType>(
         ingredientInitialState.ingredient
     )
+    const [loading,setLoading] = useState(false)
 
     useEffect(() => {
         const categoriesSet = new Set(
@@ -52,14 +53,17 @@ const NewIngredient = (props: NewIngredientProps) => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        const res = await ingredientApi.createIngredient(fieldData)
-        if (res.id) {
+        const { _id, ...data } = fieldData
+        const res = await ingredientApi.createIngredient(data)
+        setLoading(true)
+        if (res._id) {
             dispatch(refreshIngredients())
             handleBack()
             alert(`Ingredient created successfully`)
             return
         }
         alert(`Ingredient created unsuccessfully`)
+        setLoading(false)
     }
 
     const fields: CreatePanelFieldsType[] = [
@@ -72,7 +76,7 @@ const NewIngredient = (props: NewIngredientProps) => {
             fullWidth: true,
         },
         () => (
-            <FormControl fullWidth>
+            <FormControl fullWidth required>
                 <InputLabel id="demo-multiple-chip-label">
                     Ingredient Category
                 </InputLabel>
@@ -115,6 +119,7 @@ const NewIngredient = (props: NewIngredientProps) => {
         <CreatePanel
             title="New Ingredient"
             handleBack={handleBack}
+            loading={loading}
             fields={fields}
             handleSubmit={handleSubmit}
         />

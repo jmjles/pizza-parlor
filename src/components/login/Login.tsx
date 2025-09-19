@@ -26,7 +26,6 @@ const Login = () => {
     const modals = useAppSelector(selectModal)
     const store = useAppSelector(selectStore).store
     const dispatch = useAppDispatch()
-
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [remember, setRemember] = useState(false)
@@ -53,7 +52,7 @@ const Login = () => {
         localStorage.setItem('token', token)
         dispatch(toggleLoginModal())
         dispatch(setUser(user))
-        dispatch(toggleStoreModal())
+        if (!modals.storeModal) dispatch(toggleStoreModal())
     }
 
     const handleSignUp = () => {

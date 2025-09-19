@@ -14,11 +14,17 @@ import SelectItems from '@/components/form/SelectItems.tsx'
 import { MenuItemTypes } from '@/store/initialState.ts'
 
 const CreatePanel = (props: CreatePanelProps) => {
-    const { handleSubmit, fields, submitBtn, submitProps, ...panelProps } =
-        props
+    const {
+        handleSubmit,
+        fields,
+        submitBtn,
+        submitProps,
+        loading,
+        ...panelProps
+    } = props
 
     return (
-        <Panel {...panelProps}>
+        <Panel {...{ loading, ...panelProps }}>
             <Grid2
                 container
                 component="form"
@@ -35,7 +41,12 @@ const CreatePanel = (props: CreatePanelProps) => {
                     <SelectItems field={f} />
                 ))}
                 <Grid2 alignSelf="end">
-                    <Button variant="contained" {...submitProps} type="submit">
+                    <Button
+                        variant="contained"
+                        {...submitProps}
+                        type="submit"
+                        loading={loading}
+                    >
                         {submitBtn || 'Create'}
                     </Button>
                 </Grid2>

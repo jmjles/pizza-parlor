@@ -29,7 +29,7 @@ const EditIngredient = (props: EditIngredientProps) => {
     const { ingredient, ingredients } = useAppSelector(selectIngredient)
     const [fieldData, setFieldData] = useState<IngredientType>(ingredient)
     const [categories, setCategories] = useState<string[]>([])
-
+    const [loading,setLoading] = useState(false)
     useEffect(() => {
         const categoriesSet = new Set(
             ingredients.map((i) => i.category)
@@ -55,23 +55,29 @@ const EditIngredient = (props: EditIngredientProps) => {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const res = await ingredientApi.updateIngredient(fieldData)
-        if (res.id) {
+        setLoading(true)
+        if (res._id) {
             dispatch(refreshIngredients())
             handleBack()
             alert(`Ingredient updated successfully`)
+            setLoading(false)
             return
         }
         alert(`Ingredient updated unsuccessfully`)
+        setLoading(false)
     }
 
     const handleDelete = async () => {
         const res = await ingredientApi.removeIngredient(ingredient._id)
-        if (res.id) {
+        setLoading(true)
+        if (res._id) {
             dispatch(refreshIngredients())
             setScreen('ingredients')
             alert(`Ingredient deleted successfully`)
+            setLoading(false)
             return
         }
+        setLoading(false)
         alert(`Ingredient deleted unsuccessfully`)
     }
     const fields: CreatePanelFieldsType[] = [
@@ -143,6 +149,7 @@ const EditIngredient = (props: EditIngredientProps) => {
             handleSubmit={handleSubmit}
             handleAction={handleDelete}
             actionProps={DeleteBtnProps}
+            loading={loading}
             actionBtn={<DeleteBtn />}
             fields={fields}
             submitBtn={<SubmitBtn />}

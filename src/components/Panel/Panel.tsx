@@ -20,6 +20,7 @@ const Panel = ({ maxWidth = 'md', ...props }: PanelProps) => {
         handleAction,
         actionBtn,
         actionProps,
+        loading,
     } = props
     return (
         <Container sx={{ marginTop: '20px' }}>
@@ -56,6 +57,7 @@ const Panel = ({ maxWidth = 'md', ...props }: PanelProps) => {
                                 <Button
                                     variant="contained"
                                     onClick={handleAction}
+                                    loading={loading}
                                     {...actionProps}
                                     sx={{
                                         visibility: handleAction
@@ -85,4 +87,5 @@ export type PanelProps = {
     actionBtn?: React.ReactNode
     actionProps?: ButtonProps
     maxWidth?: Breakpoint
+    loading?: boolean
 }
