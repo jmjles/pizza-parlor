@@ -9,7 +9,6 @@ import { setOrders } from '@/store/slices.tsx'
 const VendorDashboard = () => {
     const [tab, setTab] = useState(0)
     const dispatch = useAppDispatch()
-
     useEffect(() => {
         const getOrders = async () => {
             const token = localStorage.getItem('token')
@@ -17,9 +16,8 @@ const VendorDashboard = () => {
             const orders = await orderApi.getOrders()
             dispatch(setOrders(orders))
         }
-
-        getOrders()
-    }, [])
+        if (tab === 3 || tab === 4) getOrders()
+    }, [tab])
 
     return (
         <Grid2 container flexDirection="column" wrap="nowrap">
