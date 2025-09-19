@@ -9,7 +9,7 @@ import { MenuCategoryType } from '@/lib/db/model/menuCategory.ts'
 import menuCategoryApi from '@/lib/api/menuCategoryApi.ts'
 import { storeApi } from '@/lib/api/storeApi.ts'
 import SubmitBtn from '@/components/form/CreateBtn.tsx'
-import { refreshStores } from '@/store/slices.tsx'
+import { refreshStores, setStore } from '@/store/slices.tsx'
 import { Grid2, Typography } from '@mui/material'
 import { Delete } from '@mui/icons-material'
 
@@ -26,6 +26,7 @@ const NewCategory = (props: ScreenProps) => {
         ...category,
         items: category.items.map((i) => i._id),
     })
+    const [loading, setLoading] = useState(false)
     const item = useAppSelector(selectItem)
 
     const handleBack = () => {
@@ -41,14 +42,17 @@ const NewCategory = (props: ScreenProps) => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setLoading(true)
         const res = await menuCategoryApi.updateMenuCategory(fieldData)
         if (res._id) {
-            handleBack()
+            setScreen('categories')
+            dispatch(refreshStores())
             alert(`Menu category updated successfully`)
+            setLoading(false)
             return
         }
+        setLoading(false)
         alert(`Failed to update menu category`)
-        return
     }
 
     const fields: CreatePanelFieldsType[] = [
@@ -80,21 +84,25 @@ const NewCategory = (props: ScreenProps) => {
     ]
 
     const handleDelete = async () => {
-        const res = await menuCategoryApi.removeMenuCategory(fieldData._id)
-        if (res.id) {
+        setLoading(true)
+        const res = await menuCategoryApi.removeMenuCategory(category._id)
+        if (res._id) {
             const resStore = await storeApi.editStore({
                 ...store,
                 menu: store.menu.filter((m: any) => m !== category._id),
             })
-            if (resStore.id) {
+            if (resStore._id) {
                 dispatch(refreshStores())
                 setScreen('categories')
                 alert(`Menu Category deleted successfully`)
+                setLoading(false)
                 return
             }
         }
+        setLoading(false)
         alert(`Menu Category deleted unsuccessfully`)
     }
+
     const Btn = () => (
         <Grid2 container spacing={1}>
             <Typography>Delete Category</Typography>
@@ -109,6 +117,7 @@ const NewCategory = (props: ScreenProps) => {
             handleBack={handleBack}
             actionBtn={<Btn />}
             handleSubmit={handleSubmit}
+            loading={loading}
             fields={fields}
             submitBtn={<SubmitBtn submitText="Update Menu Category" />}
         />

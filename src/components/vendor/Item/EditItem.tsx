@@ -29,6 +29,7 @@ import {
     MenuUnitType,
 } from '@/lib/classes/FixedMenuItem.ts'
 import { menuItemInitialState, MenuItemTypes } from '@/store/initialState.ts'
+import SelectItems from '@/components/form/SelectItems.tsx'
 
 const EditItem = (props: EditItemProps) => {
     const {
@@ -49,7 +50,7 @@ const EditItem = (props: EditItemProps) => {
         ingredients: menuItem.ingredients.map((i) => i._id),
         sauce: 'sauce' in menuItem ? menuItem.sauce._id : '',
     })
-
+    const [loading, setLoading] = useState(false)
     const [sizes, setSizes] = useState<MenuSizeButtonType[]>(
         menuItem.sizes || []
     )
@@ -67,7 +68,7 @@ const EditItem = (props: EditItemProps) => {
         title: '',
         iconSize: 'medium',
         icon: 'pizza',
-        price: '',
+        price: '$',
         usd: NaN,
     }
 
@@ -78,6 +79,12 @@ const EditItem = (props: EditItemProps) => {
 
     useEffect(() => {
         if (!isNumber(unit.price)) return
+        if (unit.price[0] !== '$') {
+            setUnit((u) => {
+                return { ...u, price: `$${unit.price}` }
+            })
+            return
+        }
         setUnit((p) => {
             if (!p) return p
             return { ...p, usd: toNumber(unit.price || '') }
@@ -111,8 +118,13 @@ const EditItem = (props: EditItemProps) => {
         setSizes((s: any) => {
             return s.map((x: any, index: number) => {
                 if (i !== index) return x
-                if (name === 'price')
+                if (name === 'price') {
+                    if (value[0] !== '$') {
+                        return { ...x, [name]: `$${value}` }
+                    }
                     return { ...x, [name]: value, usd: toNumber(value) }
+                }
+
                 return { ...x, [name]: value }
             })
         })
@@ -144,9 +156,12 @@ const EditItem = (props: EditItemProps) => {
             setStep((p) => (p += 1))
             return
         }
+        setLoading(true)
+        const { sauce, ...data } = fieldData
         const res = await menuItemApi.updateMenuItem({
-            ...fieldData,
-            _id: fieldData._id,
+            ...data,
+            //@ts-ignore
+            sauce: sauce ? sauce : undefined,
             amountLimit: Number(fieldData.amountLimit),
             sizes: itemType === 'sizes' ? sizes : [],
             //@ts-ignore
@@ -155,28 +170,32 @@ const EditItem = (props: EditItemProps) => {
                 menuItem.image ||
                 'https://img.freepik.com/free-photo/pizza-pizza-filled-with-tomatoes-salami-olives_140725-1200.jpg',
         })
-        if (res.id) {
+        if (res._id) {
             dispatch(refreshMenuItems())
             setScreen('items')
             alert(`Menu Item updated successfully`)
+            setLoading(false)
             return
         }
+        setLoading(false)
         alert(`Menu Item updated unsuccessfully`)
     }
 
     const handleDelete = async () => {
         const res = await menuItemApi.removeMenuItem(menuItem._id)
-        if (res.id) {
+        setLoading(true)
+        if (res._id) {
             dispatch(refreshMenuItems())
             setScreen('items')
             alert(`Menu item deleted successfully`)
+            setLoading(false)
             return
         }
+        setLoading(false)
         alert(`Menu item deleted unsuccessfully`)
     }
 
     const handleDeleteSize = (id: number) => {
-        console.log(id)
         setSizes((p) => p.filter((s, i) => i !== id))
     }
 
@@ -216,30 +235,39 @@ const EditItem = (props: EditItemProps) => {
                 value: fieldData.ingredients || [],
                 fullWidth: true,
                 multiple: true,
-                list: ingredients,
-            },
-            {
-                name: 'sauce',
-                label: 'Select Sauce',
-                onChange: handleChange,
-                value: fieldData.sauce || '',
-                fullWidth: true,
-                list: ingredients.filter((i) => i.category === 'Sauce'),
+                list: ingredients.filter((i) => i.category !== 'Sauce'),
             },
         ],
         [
             () => (
-                <Stack spacing={2}>
+                <Stack
+                    spacing={2}
+                    maxHeight={'60vh'}
+                    overflow="auto"
+                    padding={2}
+                >
                     <Font variant="h6">Menu Item Type</Font>
                     <Divider />
                     <RadioGroup value={itemType} onChange={handleItemType}>
                         <Grid2 container>
-                            <LabeledRadio label="Singular Size" value="unit" />
-                            <LabeledRadio label="Multiple Size" value="sizes" />
+                            <LabeledRadio label="Misc Item" value="unit" />
+                            <LabeledRadio label="Pizza Item" value="sizes" />
                         </Grid2>
                     </RadioGroup>
                     {showSize() && (
                         <Stack spacing={2}>
+                            <SelectItems
+                                field={{
+                                    name: 'sauce',
+                                    label: 'Select Sauce',
+                                    onChange: handleChange,
+                                    value: fieldData.sauce || '',
+                                    fullWidth: true,
+                                    list: ingredients.filter(
+                                        (i) => i.category === 'Sauce'
+                                    ),
+                                }}
+                            />
                             <Button
                                 variant="contained"
                                 disabled={sizes.length === 3}
@@ -286,7 +314,7 @@ const EditItem = (props: EditItemProps) => {
                         name="amountLimit"
                         value={fieldData.amountLimit || ''}
                         onChange={handleChange}
-                        label="Maximum amount per Order"
+                        label="Maximum amount per order"
                         required
                         fullWidth
                     />
@@ -306,6 +334,7 @@ const EditItem = (props: EditItemProps) => {
             handleBack={handleBack}
             handleAction={handleDelete}
             actionProps={{ color: 'error' }}
+            loading={loading}
             actionBtn={<DeleteBtn />}
             fields={fields[step]}
             submitBtn={

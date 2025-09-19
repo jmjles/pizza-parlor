@@ -1,7 +1,7 @@
 import CreatePanel, {
     CreatePanelFieldsType,
 } from '@/components/Panel/CreatePanel.tsx'
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
 import { selectIngredient } from '@/store/selectors.tsx'
 import { menuItemInitialState, MenuItemTypes } from '@/store/initialState.ts'
@@ -21,8 +21,9 @@ import LabeledRadio from '@/components/form/LabeledRadio.tsx'
 import SizeFields from '@/components/form/SizeFields.tsx'
 import { isNumber, toNumber } from '@/utils/Form.tsx'
 import { refreshMenuItems } from '@/store/slices.tsx'
-import { MenuUnitType } from '@/lib/classes/FixedMenuItem.ts'
+import { FixedMenuItem, MenuUnitType } from '@/lib/classes/FixedMenuItem.ts'
 import { MenuSizeButtonType } from '@/lib/classes/MenuItem.ts'
+import SelectItems from '@/components/form/SelectItems.tsx'
 
 const NewItem = (props: NewItemProps) => {
     const {
@@ -41,10 +42,11 @@ const NewItem = (props: NewItemProps) => {
         amountLimit: '',
         sauce: '',
     })
-
+    const [loading, setLoading] = useState(false)
     const [sizes, setSizes] = useState<MenuSizeButtonType[]>([])
-    const [unit, setUnit] = useState<MenuUnitType>()
-
+    const [unit, setUnit] = useState<MenuUnitType>(
+        (menuItemInitialState.menuItem as FixedMenuItem).unit
+    )
     const [step, setStep] = useState<number>(0)
     const [itemType, setItemType] = useState('unit')
     const { ingredients } = useAppSelector(selectIngredient)
@@ -53,7 +55,7 @@ const NewItem = (props: NewItemProps) => {
         title: '',
         iconSize: 'medium',
         icon: 'pizza',
-        price: '',
+        price: '$',
         usd: NaN,
     }
 
@@ -64,19 +66,21 @@ const NewItem = (props: NewItemProps) => {
 
     useEffect(() => {
         if (!isNumber(unit?.price || '')) return
-        setUnit((p) => {
-            if (!p) return
-            return { ...p, usd: toNumber(unit?.price || '') }
-        })
-    }, [unit?.price])
+        if (unit?.price[0] !== '$') {
+            setUnit((u) => {
+                return { ...u, price: `$${unit?.price}` }
+            })
+            return
+        }
+    }, [unit.price])
 
     useEffect(() => {
         if (!isNumber(fieldData.amountLimit)) return
         setUnit((p) => {
-            if (!p) return
-            return { ...p, usd: toNumber(unit?.price || '') }
+            if (!p) return p
+            return { ...p, usd: toNumber(unit.price || '') }
         })
-    }, [unit?.price])
+    }, [unit.price])
 
     const handleNewSize = () => {
         setSizes((s) => [...s, initialSize])
@@ -97,8 +101,13 @@ const NewItem = (props: NewItemProps) => {
         setSizes((s: any) => {
             return s.map((x: any, index: number) => {
                 if (i !== index) return x
-                if (name === 'price')
+                if (name === 'price') {
+                    if (value[0] !== '$') {
+                        return { ...x, [name]: `$${value}` }
+                    }
                     return { ...x, [name]: value, usd: toNumber(value) }
+                }
+
                 return { ...x, [name]: value }
             })
         })
@@ -130,23 +139,30 @@ const NewItem = (props: NewItemProps) => {
             setStep((p) => (p += 1))
             return
         }
+        const { _id, sauce, ...data } = fieldData
+        setLoading(true)
         const res = await menuItemApi.createMenuItem({
-            ...fieldData,
+            ...data,
             amountLimit: Number(fieldData.amountLimit),
+            //@ts-ignore
+            sauce: sauce ? sauce : undefined,
             sizes,
+            //@ts-ignore
+            unit,
             image: 'https://img.freepik.com/free-photo/pizza-pizza-filled-with-tomatoes-salami-olives_140725-1200.jpg',
         })
-        if (res.id) {
+        if (res._id) {
             dispatch(refreshMenuItems())
             setScreen('items')
             alert(`Menu Item created successfully`)
+            setLoading(false)
             return
         }
+        setLoading(false)
         alert(`Menu Item created unsuccessfully`)
     }
 
     const handleDeleteSize = (id: number) => {
-        console.log(id)
         setSizes((p) => p.filter((s, i) => i !== id))
     }
     const showUnit = () => itemType === 'unit'
@@ -184,30 +200,34 @@ const NewItem = (props: NewItemProps) => {
                 value: fieldData.ingredients || [],
                 fullWidth: true,
                 multiple: true,
-                list: ingredients,
-            },
-            {
-                name: 'sauce',
-                label: 'Select Sauce',
-                onChange: handleChange,
-                value: fieldData.sauce || '',
-                fullWidth: true,
-                list: ingredients.filter((i) => i.category === 'Sauce'),
+                list: ingredients.filter((i) => i.category !== 'Sauce'),
             },
         ],
         [
             () => (
-                <Stack>
+                <Stack spacing={1}>
                     <Font variant="h6">Menu Item Type</Font>
                     <Divider />
                     <RadioGroup value={itemType} onChange={handleItemType}>
                         <Grid2 container>
-                            <LabeledRadio label="Singular Size" value="unit" />
-                            <LabeledRadio label="Multiple Size" value="sizes" />
+                            <LabeledRadio label="Misc Item" value="unit" />
+                            <LabeledRadio label="Pizza Item" value="sizes" />
                         </Grid2>
                     </RadioGroup>
                     {showSize() && (
                         <Stack spacing={2}>
+                            <SelectItems
+                                field={{
+                                    name: 'sauce',
+                                    label: 'Select Sauce',
+                                    onChange: handleChange,
+                                    value: fieldData.sauce || '',
+                                    fullWidth: true,
+                                    list: ingredients.filter(
+                                        (i) => i.category === 'Sauce'
+                                    ),
+                                }}
+                            />
                             <Button
                                 variant="contained"
                                 disabled={sizes.length === 3}
@@ -254,7 +274,7 @@ const NewItem = (props: NewItemProps) => {
                         name="amountLimit"
                         value={fieldData.amountLimit || ''}
                         onChange={handleChange}
-                        label="Maximum amount per Order"
+                        label="Maximum amount per order"
                         required
                         fullWidth
                     />
@@ -267,6 +287,7 @@ const NewItem = (props: NewItemProps) => {
         <CreatePanel
             title="New Menu Item"
             handleBack={handleBack}
+            loading={loading}
             fields={fields[step]}
             submitBtn={
                 <SubmitBtn
