@@ -59,7 +59,7 @@ const ListPanel = (props: ListPanelProps) => {
         </Panel>
     )
 }
-interface ListPanelProps extends Omit<PanelProps, 'children'> {
+interface ListPanelProps extends Omit<PanelProps, 'children' | 'loading'> {
     list: ListTypes[]
     onClick: any
     emptyList: string
