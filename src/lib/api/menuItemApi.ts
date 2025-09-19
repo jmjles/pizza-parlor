@@ -25,7 +25,7 @@ export default {
             createHeader({
                 token,
                 method: 'DELETE',
-                body: { fields: { id: menuItemId } },
+                body: { fields: { _id: menuItemId } },
             })
         )
     },
