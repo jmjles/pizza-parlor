@@ -2,10 +2,11 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
 import { selectLoading } from '@/store/selectors.tsx'
 import Modal from '@/components/modal/Modal.tsx'
 import { Box, CircularProgress, Grid2 } from '@mui/material'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { toggleInitialLoad } from '@/store/slices.tsx'
 
 const Loading = () => {
+    const [init, setInit] = useState(false)
     const {
         loadingMenuItems,
         loadingUsers,
@@ -25,8 +26,11 @@ const Loading = () => {
 
     useEffect(() => {
         if (!initialLoad) return
-        if (loadingStates.every((v) => !v))
+        if (loadingStates.every((v) => !v)) {
+            if (init) return
+            setInit(true)
             setTimeout(() => dispatch(toggleInitialLoad()), 3000)
+        }
     }, loadingStates)
 
     return (

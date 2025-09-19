@@ -62,12 +62,7 @@ export default function Home() {
         user.type !== 'exampleVendor' &&
         user.type !== 'vendor'
 
-    const showVendorDashboard = () =>
-        !modals.signupModal &&
-        !modals.loginModal &&
-        !showWelcome() &&
-        user.type !== 'example' &&
-        user.type !== 'customer'
+    const showVendorDashboard = () => !showDashboard()
     const showLogin = () => modals.loginModal
     const showSignup = () => modals.signupModal
     const showUser = () => modals.userModal
