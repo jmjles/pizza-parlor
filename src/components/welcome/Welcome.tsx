@@ -12,6 +12,7 @@ import { LocalPizza } from '@mui/icons-material'
 const Welcome = () => {
     const modals = useAppSelector(selectModal)
     const dispatch = useAppDispatch()
+    
     const handleClose = () => {
         dispatch(toggleWelcomeModal())
     }

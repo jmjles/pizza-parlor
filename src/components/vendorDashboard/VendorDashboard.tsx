@@ -9,6 +9,7 @@ import { setOrders } from '@/store/slices.tsx'
 const VendorDashboard = () => {
     const [tab, setTab] = useState(0)
     const dispatch = useAppDispatch()
+
     useEffect(() => {
         const getOrders = async () => {
             const token = localStorage.getItem('token')
@@ -19,10 +20,14 @@ const VendorDashboard = () => {
         if (tab === 3 || tab === 4) getOrders()
     }, [tab])
 
+    const handleTab = (t:number) => {
+        setTab(t)
+    }
+
     return (
         <Grid2 container flexDirection="column" wrap="nowrap">
             <Grid2>
-                <Bar tab={[tab, setTab]} />
+                <Bar tab={tab} handleTab={handleTab} />
             </Grid2>
             <Grid2>
                 <TabPanel tab={tab} />

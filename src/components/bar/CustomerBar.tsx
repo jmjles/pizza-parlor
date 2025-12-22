@@ -11,14 +11,9 @@ import {
     Typography as Font,
 } from '@mui/material'
 import {
-    clearStore,
-    signOutUser,
     toggleCartModal,
-    toggleLoginModal,
     togglePastOrderModal,
     toggleStoreModal,
-    toggleUserModal,
-    toggleWelcomeModal,
 } from '@/store/slices.tsx'
 import {
     LocalPizza,
@@ -29,19 +24,15 @@ import {
     ShoppingCart,
 } from '@mui/icons-material'
 import { useEffect, useRef, useState } from 'react'
-import { useAppDispatch } from '@/store/hooks.tsx'
-import { StoreType } from '@/lib/db/model/store.ts'
-import { UserInitialStateType } from '@/store/initialState.ts'
+import { useAppDispatch, useAppSelector } from '@/store/hooks.tsx'
+import { BarProps } from './bar'
+import { selectStore, selectUser } from '@/store/selectors'
 
-const CustomerBar = (props: CustomerBarPropsType) => {
-    const { store, user } = props
+const CustomerBar = (props: BarProps) => {
+    const { store } = useAppSelector(selectStore)
+    const user = useAppSelector(selectUser)
     const anchorEl = useRef(null)
-    const [open, setOpen] = useState(false)
     const dispatch = useAppDispatch()
-
-    const handleMenu = () => {
-        setOpen((p) => !p)
-    }
     const [location, setLocation] = useState('')
 
     useEffect(() => {
@@ -52,31 +43,16 @@ const CustomerBar = (props: CustomerBarPropsType) => {
         )
     }, [store])
 
-    const handleLogout = () => {
-        dispatch(signOutUser())
-        dispatch(clearStore())
-        handleMenu()
-        dispatch(toggleWelcomeModal())
-    }
-
-    const handleUser = () => {
-        if (user.email) {
-            dispatch(toggleUserModal())
-        } else {
-            dispatch(toggleLoginModal())
-        }
-        handleMenu()
-    }
-
     const handleCart = () => {
         dispatch(toggleCartModal())
-        if (open) handleMenu()
+        if (props.open) props.handleMenu()
     }
 
     const handleOrders = () => {
         dispatch(togglePastOrderModal())
-        handleMenu()
+        props.handleMenu()
     }
+
     return (
         <Container>
             <Grid2
@@ -130,7 +106,7 @@ const CustomerBar = (props: CustomerBarPropsType) => {
                     </Grid2>
                     <Grid2
                         display={{ xs: 'initial', xl: 'none' }}
-                        onClick={handleMenu}
+                        onClick={props.handleMenu}
                     >
                         <IconButton color="inherit">
                             <Menu fontSize="medium" />
@@ -138,7 +114,10 @@ const CustomerBar = (props: CustomerBarPropsType) => {
                     </Grid2>
                     <Grid2 display={{ xs: 'none', xl: 'initial' }}>
                         <IconButton color="inherit">
-                            <Settings fontSize="medium" onClick={handleMenu} />
+                            <Settings
+                                fontSize="medium"
+                                onClick={props.handleMenu}
+                            />
                         </IconButton>
                     </Grid2>
                 </Grid2>
@@ -146,8 +125,8 @@ const CustomerBar = (props: CustomerBarPropsType) => {
             <MUIMenu
                 keepMounted
                 anchorEl={anchorEl.current}
-                open={open}
-                onClose={handleMenu}
+                open={props.open}
+                onClose={props.handleMenu}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 transformOrigin={{
                     vertical: 'top',
@@ -155,7 +134,7 @@ const CustomerBar = (props: CustomerBarPropsType) => {
                 }}
                 anchorPosition={{ top: 50, left: 0 }}
             >
-                <MenuItem onClick={handleUser}>
+                <MenuItem onClick={props.handleUser}>
                     <Stack direction="row" alignItems="center" spacing={2}>
                         <Avatar src={user.profileIMG} />
                         <Font>
@@ -186,7 +165,7 @@ const CustomerBar = (props: CustomerBarPropsType) => {
                                 <Font>My Orders</Font>
                             </Stack>
                         </MenuItem>
-                        <MenuItem onClick={handleLogout}>
+                        <MenuItem onClick={props.handleLogout}>
                             <Stack
                                 direction="row"
                                 alignItems="center"
@@ -202,5 +181,5 @@ const CustomerBar = (props: CustomerBarPropsType) => {
         </Container>
     )
 }
-type CustomerBarPropsType = { store: StoreType; user: UserInitialStateType }
+
 export default CustomerBar
